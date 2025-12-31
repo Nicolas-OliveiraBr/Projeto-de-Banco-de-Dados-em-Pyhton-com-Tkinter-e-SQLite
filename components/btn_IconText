@@ -1,0 +1,23 @@
+import tkinter as tk
+import customtkinter as ctk
+from PIL import Image, ImageTk
+
+class BtnIconText(ctk.CTkButton):
+    def __init__(self, master, text, icon_path, command):
+        icon = Image.open(icon_path)
+
+        super().__init__(
+            master,
+            text=f" {text}",
+            font=ctk.CTkFont(family="Inter Medium", size=20, weight="normal"),
+            image=ctk.CTkImage(icon, size=(20, 20)),
+            command=command,
+            corner_radius=5,
+            fg_color="#FDDBE9",
+            text_color="#61223D",
+            hover_color="#F385AA",
+            height=30,
+            border_width=2,
+            border_color="#CFA4B5",
+        )
+
