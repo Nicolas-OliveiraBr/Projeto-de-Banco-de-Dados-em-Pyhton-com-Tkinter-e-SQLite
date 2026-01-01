@@ -9,14 +9,18 @@ from PIL import Image, ImageTk
 
 #importando os componentes diretamente aqui
 class BtnIconText(ctk.CTkButton):
-    def __init__(self, master, text, icon_path, command):
-        icon = Image.open(icon_path)
+    def __init__(self, master, text, command, icon_path=None):
+
+        kwargs = {}
+        if icon_path:
+            icon = Image.open(icon_path)
+            kwargs["image"] = ctk.CTkImage(icon, size=(20, 20))
 
         super().__init__(
             master,
-            text=f" {text}",
+            text=text if not icon_path else f" {text}",
             font=ctk.CTkFont(family="Inter Medium", size=20, weight="normal"),
-            image=ctk.CTkImage(icon, size=(20, 20)),
+            **kwargs,
             command=command,
             corner_radius=5,
             fg_color="#FDDBE9",
@@ -103,7 +107,6 @@ class LabelEntryButton(ctk.CTkFrame):
         self.button = BtnIconText(
             self,
             text=button_text,
-            icon_path="grinch1.png",
             command=lambda: print("clicou")
         )
         self.button.grid(row=0, column=2)
@@ -114,25 +117,40 @@ form.grid(row=0, column=0, padx=50, pady=50)
 form.grid_columnconfigure(0, weight=1)
 
 labels_entry = [
-    ("Nome:", "Digite seu nome"),
-    ("Idade:", "Digite sua idade"),
-    ("Data de nascimento:", "Digite sua data de nascimento"),
-    ("CPF:", "Digite seu CPF"),
-    ("Endereço:", "Digite seu endereço"),
-    ("Cidade/UF:", "Digite sua cidade"),
-    ("Email:", "Digite seu email"),
+    ("Nome:", "Ex: Pantera"),
+    ("Idade:", "Ex: 30"),
+    ("Data de nascimento:", "Ex: 01/01/1990"),
+    ("CPF:", "Ex: 000.000.000-00"),
+    ("Endereço:", "Ex: Rua das Rosas, 123"),
+    ("Cidade/UF:", "Ex: Fortaleza/CE"),
+    ("Email:", "Ex: pantera.rosa@email.com"),
 ]
 
 for i, (label, placeholder) in enumerate(labels_entry):
     LabelEntry(form, label, placeholder)\
         .grid(row=i, column=0, sticky="ew", pady=8)
 
-
 LabelEntryButton(
     form,
     "Telefone:",
-    "Digite seu telefone",
+    "Ex: (85) 9 0000-0000",
     "Adicionar telefone"
 ).grid(row=7, column=0, sticky="ew", pady=8)
+
+buttons_frame = ctk.CTkFrame(form, fg_color="transparent")
+buttons_frame.grid(row=8, column=0, pady=(20, 0))
+buttons_frame.grid_columnconfigure((0, 1), weight=0)
+
+BtnIconText(
+    buttons_frame,
+    text="Salvar",
+    command=lambda: print("clicou salvar")
+).grid(row=0, column=0, padx=8)
+
+BtnIconText(
+    buttons_frame,
+    text="Cancelar",
+    command=lambda: print("clicou cancelar")
+).grid(row=0, column=1, padx=8)
 
 window.mainloop()
