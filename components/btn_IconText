@@ -3,14 +3,18 @@ import customtkinter as ctk
 from PIL import Image, ImageTk
 
 class BtnIconText(ctk.CTkButton):
-    def __init__(self, master, text, icon_path, command):
-        icon = Image.open(icon_path)
+    def __init__(self, master, text, command, icon_path=None):
+
+        kwargs = {}
+        if icon_path:
+            icon = Image.open(icon_path)
+            kwargs["image"] = ctk.CTkImage(icon, size=(20, 20))
 
         super().__init__(
             master,
-            text=f" {text}",
+            text=text if not icon_path else f" {text}",
             font=ctk.CTkFont(family="Inter Medium", size=20, weight="normal"),
-            image=ctk.CTkImage(icon, size=(20, 20)),
+            **kwargs,
             command=command,
             corner_radius=5,
             fg_color="#FDDBE9",
