@@ -203,6 +203,25 @@ def salvar_dados_clientes(entries):
         raise  # Repete o erro novamente caso seja um problema não tratado acima
     carregar_clientes() # Atualizando a tabela
 
+# Criando uma função para atualizar os dados de um cliente específico no banco de dados
+def atualizar_dados_clientes(cliente_id, entries): 
+    atributos_lista = []
+    valores = []
+
+    for rotulo, coluna in mapa.items(): # Percorrendo o dicionário 'mapa' para obter os nomes das colunas e os valores correspondentes
+        atributos_lista.append(f"{coluna} = ?")
+        valores.append(entries[rotulo].get()) # Obtendo o valor digitado pelo usuário no campo da interface
+
+    valores.append(cliente_id) # Adicionando o ID do cliente ao final da lista de valores para a cláusula WHERE
+
+    sql = f"""
+        UPDATE clientes
+        SET {', '.join(atributos_lista)}
+        WHERE id = ? 
+    """
+    cursor.execute(sql, tuple(valores)) 
+    conn.commit()
+
 # Comandos de definição da tela criada e desligamento
 
 root = ctk.CTk() # Criação de uma janela raíz, a principal do programa
