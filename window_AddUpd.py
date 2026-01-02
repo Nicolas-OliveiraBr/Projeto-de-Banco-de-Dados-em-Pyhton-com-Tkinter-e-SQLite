@@ -123,7 +123,7 @@ labels_entry = [
     ("CPF:", "Ex: 000.000.000-00"),
     ("Endereço:", "Ex: Rua das Rosas, 123"),
     ("Cidade/UF:", "Ex: Fortaleza/CE"),
-    ("Email:", "Ex: pantera.rosa@email.com"),
+    ("Email:", "Ex: pantera.rosa@email.com")
 ]
 
 for i, (label, placeholder) in enumerate(labels_entry):
@@ -132,15 +132,43 @@ for i, (label, placeholder) in enumerate(labels_entry):
 
 LabelEntryButton(
     form,
-    "Telefone:",
+    "Telefones:",
     "Ex: (85) 9 0000-0000",
     "Adicionar telefone"
 ).grid(row=7, column=0, sticky="ew", pady=8)
 
-buttons_frame = ctk.CTkFrame(form, fg_color="transparent")
-buttons_frame.grid(row=8, column=0, pady=(20, 0))
-buttons_frame.grid_columnconfigure((0, 1), weight=0)
+telefones = [
+    "1254523452345",
+    "9620394869381",
+    "1243459704739",
+    "","","","","","",""
+]
 
+frame_telefones = ctk.CTkScrollableFrame(form, width=100, fg_color="transparent",border_width=2, border_color="#CFA4B5", corner_radius=5)
+frame_telefones.grid(row=8, column=0, sticky="ew",pady=(20,0), padx=(170,0))
+frame_telefones.grid_columnconfigure(0, weight=1)
+
+for i,telefone in enumerate(telefones):
+    # i1 = ((i*2)-1)
+    # i2 = (i*2)
+    ctk.CTkButton(
+        frame_telefones,
+        height=23,
+        text=telefone,
+        text_color="#D4A6B9",
+        fg_color="transparent",
+        corner_radius=5
+    ).grid(row=i, column=0, sticky="ew")
+    # if i != len(telefones):
+    #     frame_telefones = ctk.CTkFrame(
+    #         frame_telefones,
+    #         fg_color="#CFA4B5",
+    #         height=2
+    #     ).grid(row=i2, column=0, sticky="ew")
+
+
+buttons_frame = ctk.CTkFrame(form, fg_color="transparent")
+buttons_frame.grid(row=9, column=0, pady=(20, 0))
 BtnIconText(
     buttons_frame,
     text="Salvar",
