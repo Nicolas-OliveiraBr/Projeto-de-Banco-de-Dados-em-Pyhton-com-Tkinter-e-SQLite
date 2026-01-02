@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import sqlite3
 import customtkinter as ctk
-
+from tkinter import messagebox
 
 # Criando o banco de dados (em SQLite)
 
@@ -167,13 +167,14 @@ mapa = {
 
 # Criando uma função para um botão que manda os valores enviados pelo usuário para o banco de dados
 
-def salvar_dados_clientes():
+def salvar_dados_clientes(entries):
     atributos_lista = []
     valores = []
 
+    # Percorre o dicionário 'mapa', que relaciona o rótulo da interface com a coluna do banco
     for rotulo, coluna in mapa.items():
-        atributos_lista.append(coluna)
-        valores.append(entries[rotulo].get())
+        atributos_lista.append(coluna) # Adiciona o nome da coluna na lista
+        valores.append(entries[rotulo].get()) # Obtém o valor digitado pelo usuário no campo da interface
 
     atributos = ", ".join(atributos_lista)
     subst = ", ".join("?" for _ in atributos_lista)
@@ -183,8 +184,23 @@ def salvar_dados_clientes():
         VALUES ({subst})
     """
 
-    cursor.execute(sql, tuple(valores))
-    conn.commit() # Comitando as alterações
+    try:
+        cursor.execute(sql, tuple(valores)) # Executa a query SQL passando os valores como tupla
+        
+        conn.commit() # Comitando as alterações
+        print("Dados salvos! :D")
+    except sqlite3.IntegrityError as e: 
+        conn.rollback() # Caso ocorra algum erro, desfaz todas as alterações feitas no banco de dados
+
+        msg = str(e).lower()
+        if "unique constraint failed" in msg: # Verifica se o erro foi causado por violar a restrição UNIQUE do atributo
+            if "cpf" in msg:
+                messagebox.showerror("Erro ao salvar", "CPF já cadastrado. Use outro CPF e tente novamente.") # Mensagem de erro
+                return False
+            if "email" in msg:
+                messagebox.showerror("Erro ao salvar", "E-mail já cadastrado. Use outro e‑mail e tente novamente.")
+                return False
+        raise  # Repete o erro novamente caso seja um problema não tratado acima
     carregar_clientes() # Atualizando a tabela
 
 # Comandos de definição da tela criada e desligamento
