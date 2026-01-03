@@ -1,8 +1,8 @@
 import tkinter as tk
 import customtkinter as ctk
 from PIL import Image, ImageTk
-from window import salvar_dados_clientes
-from window import atualizar_dados_clientes
+from dataBaseConn import salvar_dados_clientes
+from dataBaseConn import atualizar_dados_clientes
 from components.entry import Entry
 from components.label import Label
 from components.btn_IconText import BtnIconText
