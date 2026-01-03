@@ -1,6 +1,8 @@
 import tkinter as tk
 import customtkinter as ctk
 from PIL import Image, ImageTk
+from window import salvar_dados_clientes
+from window import atualizar_dados_clientes
 
 #imports dos componentes de components/ não funciona
 # import components.entry as entry
@@ -65,6 +67,8 @@ window.grid_rowconfigure(0, weight=1)
 window.grid_columnconfigure(0, weight=1)
 window.minsize(400, 250)
 
+entries = {}
+
 class LabelEntry(ctk.CTkFrame):
     def __init__(self, master, label_text, placeholder):
         super().__init__(master, fg_color="transparent")
@@ -83,9 +87,10 @@ class LabelEntry(ctk.CTkFrame):
             placeholder,
         )
         self.entry.grid(row=0, column=1, sticky="ew", ipadx=5)
+        entries[label_text.replace(":", "").strip()] = self.entry
 
 class LabelEntryButton(ctk.CTkFrame):
-    def __init__(self, master, label_text, placeholder, button_text):
+    def __init__(self, master, label_text, placeholder, button_text, entries):
         super().__init__(master, fg_color="transparent")
 
         self.grid_columnconfigure(1, weight=1)
@@ -111,6 +116,58 @@ class LabelEntryButton(ctk.CTkFrame):
         )
         self.button.grid(row=0, column=2)
 
+        entries[label_text.replace(":", "").strip()] = self.entry
+
+class LabelCheckbox(ctk.CTkFrame):
+    def __init__(self, master, label_text, default=False):
+        super().__init__(master, fg_color="transparent")
+
+        self.grid_columnconfigure(0, weight=0)
+        self.label = Label(
+            self,
+            text=label_text,
+            label_width=155
+        )
+        self.label.grid(row=0, column=0, padx=(0, 15), sticky="w")
+
+        self.container = ctk.CTkFrame(
+            self,
+            fg_color="transparent",
+            corner_radius=5,
+            border_width=2,
+            border_color="#CFA4B5"
+        )
+        # container envolve checkbox + state_label
+        self.container.grid(row=0, column=1, sticky="w")
+        self.container.grid_columnconfigure(0, weight=0)
+        self.container.grid_columnconfigure(1, weight=0)
+
+        self.var = tk.BooleanVar(value=default)
+
+        def atualiza_label():
+            state_label = "Ativo" if self.var.get() else "Inativo"
+            # exibe "Status: Ativo" ou "Status: Inativo"
+            self.state_label.configure(text=state_label)
+
+        self.checkbox = ctk.CTkCheckBox(
+            self.container,
+            text="",  # remove o texto padrão "CTKcheckbox"
+            variable=self.var,
+            border_color="#CFA4B5",
+            border_width=2,
+            corner_radius=15,
+            hover_color="#F385AA",
+            command=atualiza_label
+        )
+        self.checkbox.grid(row=0, column=0, padx=(8, 5), pady=4, sticky="w")
+
+        self.state_label = Label(self.container, text="", label_width=25)
+        self.state_label.grid(row=0, column=1, padx=(5, 8), pady=4, sticky="e")
+
+        entries[label_text.replace(":", "").strip()] = self.var
+
+        atualiza_label()
+
 form = ctk.CTkFrame(window, fg_color="transparent")
 form.grid(row=0, column=0, padx=50, pady=50)
 
@@ -119,22 +176,25 @@ form.grid_columnconfigure(0, weight=1)
 labels_entry = [
     ("Nome:", "Ex: Pantera"),
     ("Idade:", "Ex: 30"),
-    ("Data de nascimento:", "Ex: 01/01/1990"),
+    ("Data de Nascimento:", "Ex: 01/01/1990"),
     ("CPF:", "Ex: 000.000.000-00"),
     ("Endereço:", "Ex: Rua das Rosas, 123"),
     ("Cidade/UF:", "Ex: Fortaleza/CE"),
-    ("Email:", "Ex: pantera.rosa@email.com")
+    ("E-mail:", "Ex: pantera.rosa@email.com"),
 ]
 
 for i, (label, placeholder) in enumerate(labels_entry):
     LabelEntry(form, label, placeholder)\
         .grid(row=i, column=0, sticky="ew", pady=8)
 
+LabelCheckbox(form, "Status:").grid(row=8, column=0, padx=5, pady=(8), sticky="nsew")
+
 LabelEntryButton(
     form,
     "Telefones:",
     "Ex: (85) 9 0000-0000",
-    "Adicionar telefone"
+    "Adicionar telefone",
+    entries
 ).grid(row=7, column=0, sticky="ew", pady=8)
 
 telefones = [
@@ -145,7 +205,7 @@ telefones = [
 ]
 
 frame_telefones = ctk.CTkScrollableFrame(form, width=100, fg_color="transparent",border_width=2, border_color="#CFA4B5", corner_radius=5)
-frame_telefones.grid(row=8, column=0, sticky="ew",pady=(20,0), padx=(170,0))
+frame_telefones.grid(row=9, column=0, sticky="ew",pady=(10,0), padx=(170,0))
 frame_telefones.grid_columnconfigure(0, weight=1)
 
 for i,telefone in enumerate(telefones):
@@ -168,11 +228,11 @@ for i,telefone in enumerate(telefones):
 
 
 buttons_frame = ctk.CTkFrame(form, fg_color="transparent")
-buttons_frame.grid(row=9, column=0, pady=(20, 0))
+buttons_frame.grid(row=10, column=0, pady=(0, 8)) #não aparece botões devido passar do tamanho da janela, ajustar com scroll?
 BtnIconText(
     buttons_frame,
     text="Salvar",
-    command=lambda: print("clicou salvar")
+    command=lambda: salvar_dados_clientes(entries)
 ).grid(row=0, column=0, padx=8)
 
 BtnIconText(
