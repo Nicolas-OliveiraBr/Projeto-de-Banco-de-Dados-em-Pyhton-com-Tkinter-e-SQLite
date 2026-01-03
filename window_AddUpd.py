@@ -3,58 +3,9 @@ import customtkinter as ctk
 from PIL import Image, ImageTk
 from window import salvar_dados_clientes
 from window import atualizar_dados_clientes
-
-#imports dos componentes de components/ não funciona
-# import components.entry as entry
-# import components.label as label
-# import components.btn_IconText as btn_IconText
-
-#importando os componentes diretamente aqui
-class BtnIconText(ctk.CTkButton):
-    def __init__(self, master, text, command, icon_path=None):
-
-        kwargs = {}
-        if icon_path:
-            icon = Image.open(icon_path)
-            kwargs["image"] = ctk.CTkImage(icon, size=(20, 20))
-
-        super().__init__(
-            master,
-            text=text if not icon_path else f" {text}",
-            font=ctk.CTkFont(family="Inter Medium", size=20, weight="normal"),
-            **kwargs,
-            command=command,
-            corner_radius=5,
-            fg_color="#FDDBE9",
-            text_color="#61223D",
-            hover_color="#F385AA",
-            height=30,
-            border_width=2,
-            border_color="#CFA4B5",
-        )
-
-class Label(ctk.CTkLabel):
-    def __init__(self, master, text, label_width):
-        super().__init__(
-            master,
-            text=text,
-            font=ctk.CTkFont("Inter Medium", 16, "bold"),
-            text_color="#61223D",
-            width=label_width,
-            anchor="w"
-        )
-
-class Entry(ctk.CTkEntry):
-    def __init__(self, master, placeholder):
-        super().__init__(
-            master,
-            placeholder_text=placeholder,
-            font=ctk.CTkFont("Inter Medium", 16),
-            fg_color="#FDF4F7",
-            height=30,
-            border_width=2,
-            border_color="#CFA4B5"
-        )
+from components.entry import Entry
+from components.label import Label
+from components.btn_IconText import BtnIconText
 
 window = ctk.CTk()
 window.state('zoomed')
@@ -90,7 +41,7 @@ class LabelEntry(ctk.CTkFrame):
         entries[label_text.replace(":", "").strip()] = self.entry
 
 class LabelEntryButton(ctk.CTkFrame):
-    def __init__(self, master, label_text, placeholder, button_text, entries):
+    def __init__(self, master, label_text, placeholder, button_text, entries, command):
         super().__init__(master, fg_color="transparent")
 
         self.grid_columnconfigure(1, weight=1)
@@ -112,7 +63,7 @@ class LabelEntryButton(ctk.CTkFrame):
         self.button = BtnIconText(
             self,
             text=button_text,
-            command=lambda: print("clicou")
+            command=command
         )
         self.button.grid(row=0, column=2)
 
@@ -169,7 +120,7 @@ class LabelCheckbox(ctk.CTkFrame):
         atualiza_label()
 
 form = ctk.CTkFrame(window, fg_color="transparent")
-form.grid(row=0, column=0, padx=50, pady=50)
+form.grid(row=0, column=0, padx=50, pady=25)
 
 form.grid_columnconfigure(0, weight=1)
 
@@ -193,44 +144,60 @@ LabelEntryButton(
     "Telefones:",
     "Ex: (85) 9 0000-0000",
     "Adicionar telefone",
-    entries
+    entries,
+    command=lambda:print("estou aqui")
 ).grid(row=7, column=0, sticky="ew", pady=8)
 
-LabelCheckbox(form, "Status:").grid(row=8, column=0, padx=5, pady=(8), sticky="nsew")
+LabelCheckbox(form, "Status:").grid(row=9, column=0, padx=5, pady=(8), sticky="nsew")
 
-frame_telefones = ctk.CTkScrollableFrame(form, width=100, fg_color="transparent",border_width=2, border_color="#CFA4B5", corner_radius=5)
-frame_telefones.grid(row=9, column=0, sticky="ew",pady=(8,16), padx=(170,0))
-frame_telefones.grid_columnconfigure(0, weight=1)
+frame_telefones = ctk.CTkFrame(form, fg_color= "transparent")
+frame_telefones.grid(row=8, column=0, pady=8, padx=0, sticky="ew")
+frame_telefones.grid_columnconfigure(1,weight=1)
 
+frame_listaTelefones = ctk.CTkScrollableFrame(frame_telefones, width=127, fg_color="transparent",border_width=2, border_color="#CFA4B5", corner_radius=5)
+frame_listaTelefones.grid(row=0, column=0, padx=(170,10))
+frame_listaTelefones.grid_columnconfigure(0, weight=1)
 
 telefonesStr = ["1254523452345", "9620394869381", "1243459704739"]#lista telefônica que será retirada do banco de dados
 telefonesButtons = []#lista de botões com os número telefônicos para que possam ser deletados
-numberSlc = ""#número da lista de descarte de números telefonicos selecionado num momento
+numberSlc = []#número da lista de descarte de números telefonicos selecionado num momento
 
 def selecionarBotao(index):
     global numberSlc
     for i in range(len(telefonesButtons)):
         telefonesButtons[i].configure(fg_color="transparent",text_color="#D4A6B9")
     telefonesButtons[index].configure(fg_color="#CFA4B5", text_color="#61223D")
-    numberSlc = telefonesButtons[index].cget("text")
+    numberSlc = [telefonesButtons[index].cget("text"),index]
 
-for i,telefone in enumerate(telefonesStr):
-    btn = ctk.CTkButton(
-        frame_telefones,
-        height=23,
-        text=telefone,
-        font=ctk.CTkFont(weight="bold"),
-        text_color="#D4A6B9",
-        fg_color="transparent",
-        corner_radius=5,
-        command=lambda i=i: 
-            selecionarBotao(i)
-    )
-    btn.grid(row=i, column=0, sticky="ew")
-    telefonesButtons.append(btn)
+def criarListaTelefones():
+    for i,telefone in enumerate(telefonesStr):
+        btn = ctk.CTkButton(
+            frame_listaTelefones,
+            height=23,
+            text=telefone,
+            font=ctk.CTkFont(weight="bold"),
+            text_color="#D4A6B9",
+            fg_color="transparent",
+            corner_radius=5,
+            command=lambda i=i: 
+                selecionarBotao(i)
+        )
+        btn.grid(row=i, column=0, sticky="ew")
+        telefonesButtons.append(btn)
+
+def removerTelefone():
+    global numberSlc
+    telefonesStr.remove(numberSlc[0])
+    telefonesButtons[numberSlc[1]].destroy()
+
+criarListaTelefones()
+
+removeTelBtn = BtnIconText(frame_telefones, text="Remover telefone", command=lambda: removerTelefone())
+removeTelBtn.grid(row=0, column=1, sticky="new")
 
 buttons_frame = ctk.CTkFrame(form, fg_color="transparent")
-buttons_frame.grid(row=10, column=0, pady=(0, 8)) #não aparece botões devido passar do tamanho da janela, ajustar com scroll?
+buttons_frame.grid(row=10, column=0, pady=(0, 8))
+
 BtnIconText(
     buttons_frame,
     text="Salvar",

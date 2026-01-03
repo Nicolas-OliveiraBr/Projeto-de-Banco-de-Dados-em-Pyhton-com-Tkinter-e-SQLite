@@ -382,4 +382,5 @@ btn_mostrar_clientes = tk.Button(
     command=carregar_clientes)
 btn_mostrar_clientes.pack(side="top", pady=5)
 
-root.mainloop() # Liga a interface gráfica e a mantém ativa
+if __name__ == "__main__":
+    root.mainloop()
