@@ -187,7 +187,6 @@ for i, (label, placeholder) in enumerate(labels_entry):
     LabelEntry(form, label, placeholder)\
         .grid(row=i, column=0, sticky="ew", pady=8)
 
-LabelCheckbox(form, "Status:").grid(row=8, column=0, padx=5, pady=(8), sticky="nsew")
 
 LabelEntryButton(
     form,
@@ -197,35 +196,38 @@ LabelEntryButton(
     entries
 ).grid(row=7, column=0, sticky="ew", pady=8)
 
-telefones = [
-    "1254523452345",
-    "9620394869381",
-    "1243459704739",
-    "","","","","","",""
-]
+LabelCheckbox(form, "Status:").grid(row=8, column=0, padx=5, pady=(8), sticky="nsew")
 
 frame_telefones = ctk.CTkScrollableFrame(form, width=100, fg_color="transparent",border_width=2, border_color="#CFA4B5", corner_radius=5)
-frame_telefones.grid(row=9, column=0, sticky="ew",pady=(10,0), padx=(170,0))
+frame_telefones.grid(row=9, column=0, sticky="ew",pady=(8,16), padx=(170,0))
 frame_telefones.grid_columnconfigure(0, weight=1)
 
-for i,telefone in enumerate(telefones):
-    # i1 = ((i*2)-1)
-    # i2 = (i*2)
-    ctk.CTkButton(
+
+telefonesStr = ["1254523452345", "9620394869381", "1243459704739"]#lista telefônica que será retirada do banco de dados
+telefonesButtons = []#lista de botões com os número telefônicos para que possam ser deletados
+numberSlc = ""#número da lista de descarte de números telefonicos selecionado num momento
+
+def selecionarBotao(index):
+    global numberSlc
+    for i in range(len(telefonesButtons)):
+        telefonesButtons[i].configure(fg_color="transparent",text_color="#D4A6B9")
+    telefonesButtons[index].configure(fg_color="#CFA4B5", text_color="#61223D")
+    numberSlc = telefonesButtons[index].cget("text")
+
+for i,telefone in enumerate(telefonesStr):
+    btn = ctk.CTkButton(
         frame_telefones,
         height=23,
         text=telefone,
+        font=ctk.CTkFont(weight="bold"),
         text_color="#D4A6B9",
         fg_color="transparent",
-        corner_radius=5
-    ).grid(row=i, column=0, sticky="ew")
-    # if i != len(telefones):
-    #     frame_telefones = ctk.CTkFrame(
-    #         frame_telefones,
-    #         fg_color="#CFA4B5",
-    #         height=2
-    #     ).grid(row=i2, column=0, sticky="ew")
-
+        corner_radius=5,
+        command=lambda i=i: 
+            selecionarBotao(i)
+    )
+    btn.grid(row=i, column=0, sticky="ew")
+    telefonesButtons.append(btn)
 
 buttons_frame = ctk.CTkFrame(form, fg_color="transparent")
 buttons_frame.grid(row=10, column=0, pady=(0, 8)) #não aparece botões devido passar do tamanho da janela, ajustar com scroll?
