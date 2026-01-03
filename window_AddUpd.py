@@ -148,15 +148,24 @@ LabelEntryButton(
     command=lambda:print("estou aqui")
 ).grid(row=7, column=0, sticky="ew", pady=8)
 
-LabelCheckbox(form, "Status:").grid(row=9, column=0, padx=5, pady=(8), sticky="nsew")
+tipo_telefone = ctk.CTkComboBox(form,
+                                values=["Celular","Fixo","WhatApp"], 
+                                width= 148, 
+                                fg_color="#FDE6F0", 
+                                border_color="#CFA4B5", 
+                                button_color="#CFA4B5", 
+                                dropdown_fg_color="#CFA4B5"
+                                )
+tipo_telefone.grid(row=8, column=0, sticky="w", padx=(172,0))
 
 frame_telefones = ctk.CTkFrame(form, fg_color= "transparent")
-frame_telefones.grid(row=8, column=0, pady=8, padx=0, sticky="ew")
+frame_telefones.grid(row=9, column=0, pady=8, padx=0, sticky="ew")
 frame_telefones.grid_columnconfigure(1,weight=1)
 
-frame_listaTelefones = ctk.CTkScrollableFrame(frame_telefones, width=127, fg_color="transparent",border_width=2, border_color="#CFA4B5", corner_radius=5)
-frame_listaTelefones.grid(row=0, column=0, padx=(170,10))
+frame_listaTelefones = ctk.CTkScrollableFrame(frame_telefones, width=125,height=100, fg_color="transparent",border_width=2, border_color="#CFA4B5", corner_radius=5)
+frame_listaTelefones.grid(row=0, column=0, padx=(172,10), sticky="n")
 frame_listaTelefones.grid_columnconfigure(0, weight=1)
+frame_listaTelefones._scrollbar.configure(height=0)
 
 telefonesStr = ["1254523452345", "9620394869381", "1243459704739"]#lista telefônica que será retirada do banco de dados
 telefonesButtons = []#lista de botões com os número telefônicos para que possam ser deletados
@@ -195,8 +204,10 @@ criarListaTelefones()
 removeTelBtn = BtnIconText(frame_telefones, text="Remover telefone", command=lambda: removerTelefone())
 removeTelBtn.grid(row=0, column=1, sticky="new")
 
+LabelCheckbox(form, "Status:").grid(row=10, column=0, padx=5, pady=(8), sticky="nsew")
+
 buttons_frame = ctk.CTkFrame(form, fg_color="transparent")
-buttons_frame.grid(row=10, column=0, pady=(0, 8))
+buttons_frame.grid(row=11, column=0, pady=(0, 8))
 
 BtnIconText(
     buttons_frame,
