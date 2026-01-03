@@ -54,7 +54,7 @@ class LabelEntryButton(ctk.CTkFrame):
         self.label.grid(row=0, column=0, padx=(0, 10), sticky="w")
 
         def apenasNumeros(char):
-            return char.isdigit() or char == ""
+            return (char.isdigit() or char == "") and len(char)<=10
 
         validador = window.register(apenasNumeros)
 
@@ -169,10 +169,11 @@ for i, (label, placeholder) in enumerate(labels_entry):
 def adicionarNumero():
     global telefonesButtons
     newTel = button_addNum.entry.get()
-    telefonesStr.append(newTel)
-    for btn in telefonesButtons:
-        telefonesButtons.remove(btn)
-    criarListaTelefones()
+    if len(newTel) == 10 and newTel not in telefonesStr:
+        telefonesStr.append(newTel)
+        for btn in telefonesButtons:
+            telefonesButtons.remove(btn)
+        criarListaTelefones()
 
 button_addNum = LabelEntryButton(
     form,
@@ -206,7 +207,7 @@ frame_listaTelefones.grid(row=9, column=0, padx=(172,10), pady=(16,5), sticky="e
 frame_listaTelefones.grid_columnconfigure(0, weight=1)
 frame_listaTelefones._scrollbar.configure(height=0)
 
-telefonesStr = ["1234123423","132456","1325678","12341667884568"]
+telefonesStr = []
 telefonesButtons = []#lista de botões com os número telefônicos para que possam ser deletados
 numberSlc = []#número da lista de descarte de números telefonicos selecionado num momento
 
