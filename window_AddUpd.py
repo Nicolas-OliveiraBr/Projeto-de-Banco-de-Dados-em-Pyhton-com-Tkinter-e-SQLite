@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import customtkinter as ctk
 from tkinter import ttk
 from PIL import Image, ImageTk
@@ -145,8 +146,8 @@ class TelefoneButton(ctk.CTkButton):
             master,
             height=23,
             text=text,
-            font=ctk.CTkFont(family="Inter Medium", weight="bold"),
-            text_color="#D4A6B9",
+            font=ctk.CTkFont(family="Inter Medium", size=15, weight="bold"),
+            text_color="#A97456",
             fg_color="transparent",
             corner_radius=5,
             command=self.selecionar
@@ -187,8 +188,7 @@ label_titulo = ctk.CTkLabel(
     text_color="#61223D",
     fg_color="#F385AA",
     anchor="w",
-    padx=10,
-    pady=6
+    padx=10, pady=6
 ).grid(row=0, column=0, pady=(0, 4), sticky="ew")
 
 # Criando um array de tuplas, cada uma com o texto de cada label e sua respectiva sugestão (placeholder)
@@ -209,12 +209,35 @@ for i, (label, placeholder) in enumerate(labels_entry):
 
 def adicionarTelefone():
     global telefonesButtons
-    newTel = button_addNum.entry.get()
-    if len(newTel) == 10 and newTel not in telefonesStr:
-        telefonesStr.append(newTel)
-        for btn in telefonesButtons:
-            telefonesButtons.remove(btn)
-        criarListaTelefones()
+
+    # Definindo um tamanho mínimo e máximo para o número de telefone
+    tamanho_min = 10
+    tamanho_max = 13
+
+    newTel = button_addNum.entry.get() # Obtém o valor digitado na entrada de telefone
+    numero_ = newTel.replace("(", "").replace(")", "").replace(" ", "").replace("-", "").replace("+", "") # Removendo todos os caracteres especiais do número de telefone para que seja possível contar apenas os dígitos numéricos
+
+    while True:
+        try:
+            for digito in numero_:
+                if not digito.isdigit():
+                    messagebox.showerror("Erro de digitação", "A entrada enviada é inválida. Por favor, insira um valor de telefone válido, evitando símbolos, letras e espaços.")
+                    button_addNum.entry.delete(0, tk.END)
+                    continue
+            else:
+                print("Tudo okay")
+
+            elif len(numero_) >= tamanho_min and len(numero_) <= tamanho_max
+                # telefonesStr.append(newTel)
+                # for btn in telefonesButtons:
+                #     telefonesButtons.remove(btn)
+                
+                formatar_telefone(numero) # Após conferir o número, retorna o valor já editado 
+                criarListaTelefones()
+                break
+        except:
+            messagebox.showerror("Erro", "Um erro foi encontrado ao tentar adicionar o número de telefone. Por favor, tente novamente.")
+            break
 
  # Adicionando um frame para que o campo de entrada de Telefone fique na mesma linha do Combox
 
@@ -233,21 +256,42 @@ tipo_telefone = ctk.CTkComboBox(
     border_color="#CFA4B5", 
     button_color="#CFA4B5", 
     dropdown_fg_color="#CFA4B5",
-    font=ctk.CTkFont(size=16)
+    font=ctk.CTkFont(size=16),
+    state="readonly"
 )
 tipo_telefone.grid(row=8, column=0, sticky="ew")
 tipo_telefone.configure(0, width=1)
 tipo_telefone.set("Selecione o tipo de telefone")
 
+# Criando uma função que verifca em tempo real o tamanho da entrada do usuãrio e adiciona um tipo de "formatação" para que o número seja enviado para a tabela 
+
+def formatar_telefone(numero): # Definindo que a função tem um parâmetro event, que serve para identificar os eventos de tecla no teclado quando apertadas
+    global tipo_telefone
+
+    
+
+    if len(numero) == 12: # Verificando se o número digitado possui 
+        tipo_telefone.configure(values=["Fixo"]) # Definindo que o único tipo de telefone disponível para esse tamanho (12) é o 'Fixo', evitando que o número seja registrado como 'Celular' ou 'WhatsApp'
+        tipo_telefone.set("Fixo")
+        numero_local = numero[4:12] # Cortando os oito primeiros dígitos do número local (padrão), ignorando o valor de DDD e DDI
+        ddi = numero[0:2] # Cortando os dois primeiros dígitos do número registrado para que sirva como o DDD]
+        ddd = numero[2:4] # Cortando os dois próximos dígitos do número para que seja registrado como DDD do número
+        telefone_formatado = f"+{ddi} ({ddd}) {numero_local[0:4]}-{numero_local[4:8]}"
+        return telefone_formatado
+       
+
+
+    
+
 button_addNum = LabelEntryButton(
     form,
-    "Telefone",
+    "Número de telefone",
     "Ex: (85) 9 0000-0000",
     "Adicionar telefone",
     entries,
     command=lambda: adicionarTelefone())
 button_addNum.grid(row=9, column=0, sticky="ew", padx=(0,4), pady=8)
-
+# button_addNum.entry.insert(0, "+55 (85) 9 ") # Inserindo um início de telefone padrão para a entrada de telefone do usuário
 
 # Criando um novo botão para adicionar telefones
 
@@ -280,7 +324,7 @@ frame_listaTelefones.grid(row=0, column=0, padx=(0, 0), sticky="we")
 frame_listaTelefones.grid_columnconfigure(0, weight=1)
 frame_listaTelefones._scrollbar.configure(height=0)
 
-telefonesStr = ["1254523452345", "9620394869381", "1243459704739"] # Lista telefônica que será retirada do banco de dados
+telefonesStr = ["1254523452345 - Telefone Celular", "9620394869381 - Telefone Fixo", "1243459704739 - Telefone WhatsApp"] # Lista telefônica que será retirada do banco de dados
 telefonesButtons = [] # Lista de botões com os número telefônicos para que possam ser deletados
 numberSlc = None # Número da lista de descarte de números telefonicos selecionado num momento
 
@@ -289,8 +333,8 @@ def removerTelefone():
     if not numberSlc:
         return  # Nada selecionado
 
-    telefonesStr[:] = [t for t in telefonesStr if t != numberSlc]
-    
+    telefonesStr[:] = [t for t in telefonesStr if t != numberSlc] # Cria uma cópia da lista telefonesStr, itera com ela e atualiza a lista original com o telefone deletado, a fim de evitar bugs na hora da iteração
+
     for btn in telefonesButtons[:]:
         if btn.cget("text") == numberSlc:
             btn.destroy()
@@ -299,12 +343,24 @@ def removerTelefone():
 
 
 def criarListaTelefones():
+    ctk.CTkLabel(
+        frame_listaTelefones,
+        text="Telefones Registrados",
+        font=ctk.CTkFont("Segoe UI", 20, "bold"),
+        text_color="#61223D",
+        width=20,
+        anchor="w",
+        corner_radius=10,
+        padx=10, pady=6,
+        fg_color="#F5C89A"
+    ).grid(row=0, column=0, sticky="ew", padx=8, pady=(4,8)) # Criando uma label como t'itulo da lista de telefones
+
     for i, telefone in enumerate(telefonesStr):
         btn = TelefoneButton(
             frame_listaTelefones, 
             text=telefonesStr[i]
         )
-        btn.grid(row=i, column=0, sticky="ew")
+        btn.grid(row=i+1, column=0, sticky="ew")
         telefonesButtons.append(btn)
 
 criarListaTelefones()
