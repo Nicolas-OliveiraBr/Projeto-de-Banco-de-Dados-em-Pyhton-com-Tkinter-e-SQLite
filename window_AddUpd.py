@@ -1,5 +1,7 @@
 import tkinter as tk
+from tkinter import messagebox
 import customtkinter as ctk
+from tkinter import ttk
 from PIL import Image, ImageTk
 from dataBaseConn import salvar_dados_clientes
 from dataBaseConn import atualizar_dados_clientes
@@ -40,6 +42,11 @@ class LabelEntry(ctk.CTkFrame):
         self.entry.grid(row=0, column=1, sticky="ew", ipadx=5)
         entries[label_text.replace(":", "").strip()] = self.entry
 
+def apenasNumeros(char):
+    return (char.isdigit() or char == "")
+
+validador = window.register(apenasNumeros)
+
 class LabelEntryButton(ctk.CTkFrame):
     def __init__(self, master, label_text, placeholder, button_text, entries, command):
         super().__init__(master, fg_color="transparent")
@@ -53,10 +60,7 @@ class LabelEntryButton(ctk.CTkFrame):
         )
         self.label.grid(row=0, column=0, padx=(0, 10), sticky="w")
 
-        def apenasNumeros(char):
-            return (char.isdigit() or char == "") and len(char)<=10
-
-        validador = window.register(apenasNumeros)
+        
 
         self.entry = Entry(
             self,
@@ -74,7 +78,7 @@ class LabelEntryButton(ctk.CTkFrame):
             text=button_text,
             command=command
         )
-        self.button.grid(row=0, column=2)
+        self.button.grid(row=1, column=0, sticky="ew", pady=(8,0), columnspan=2)
 
         entries[label_text.replace(":", "").strip()] = self.entry
 
@@ -107,7 +111,7 @@ class LabelCheckbox(ctk.CTkFrame):
         def atualiza_label():
             state_label = "Ativo" if self.var.get() else "Inativo"
             # exibe "Status: Ativo" ou "Status: Inativo"
-            self.state_label.configure(text=state_label)
+            self.state_label.configure(text=state_label) # Altera a exibição da label quando ativo => .configure ajusta alguma propriedade, determinada durante a cosntrução do código
 
         self.checkbox = ctk.CTkCheckBox(
             self.container,
@@ -128,29 +132,77 @@ class LabelCheckbox(ctk.CTkFrame):
 
         atualiza_label()
 
+# class TelefoneButton(ctk.CTkButton):
+#     def selecionarBotao(index):
+#         global numberSlc
+#         for btn in telefonesButtons:
+#             btn.configure(fg_color="transparent",text_color="#D4A6B9")
+#         self.configure(fg_color="#CFA4B5", text_color="#61223D")
+#         numberSlc = self._text
+
+#     def __init__(self, master, text):
+#         super().__init__(
+#             master,
+#             height=23,
+#             text=text,
+#             font=ctk.CTkFont(family="Inter Medium", weight="bold"),
+#             text_color="#D4A6B9",
+#             fg_color="transparent",
+#             corner_radius=5,
+#         )
+
 class TelefoneButton(ctk.CTkButton):
-    def selecionarBotao(self):
-        global numberSlc
-        for btn in telefonesButtons:
-           btn.configure(fg_color="transparent",text_color="#D4A6B9")
-        self.configure(fg_color="#CFA4B5", text_color="#61223D")
-        numberSlc = self._text
-
     def __init__(self, master, text):
-        super().__init__(master,
-                        text=text, 
-                        command=self.selecionarBotao, 
-                        font=ctk.CTkFont(family="Inter Medium", weight="bold"),
-                        height=23,
-                        text_color="#D4A6B9",
-                        fg_color="transparent",
-                        corner_radius=5
-                        )
+        super().__init__(
+            master,
+            height=23,
+            text=text,
+            font=ctk.CTkFont(family="Inter Medium", size=15, weight="bold"),
+            text_color="#A97456",
+            fg_color="transparent",
+            corner_radius=5,
+            command=self.selecionar
+        )
 
-form = ctk.CTkFrame(window, fg_color="transparent")
-form.grid(row=0, column=0, padx=50, pady=25)
+    def selecionar(self):
+        global numberSlc  # Desmarca todos os botões
+        for btn in telefonesButtons:
+            btn.configure(fg_color="transparent", text_color="#D4A6B9")
+        self.configure(fg_color="#CFA4B5", text_color="#61223D") # Marca o selecionado
+        numberSlc = self.cget("text")
 
-form.grid_columnconfigure(0, weight=1)
+
+# Criação de um frame rolável para que seja possível evitar que o conteúdo vaze da tela ao adicionar mais widgets
+
+form = ctk.CTkScrollableFrame(
+    window, 
+    fg_color="transparent",
+    border_width=5,
+    border_color="#F385AA",
+    corner_radius=20,
+    width=window.winfo_width(),
+    height=window.winfo_height(),
+    scrollbar_button_color="#FDDBE9",
+    scrollbar_button_hover_color="#F385AB"
+)
+
+form.grid(row=0, column=0, padx=50, pady=25, sticky="nsew")
+form.grid_columnconfigure(0, weight=1) # Define que a coluna onde o frame se encontra poderá se esticar em mais uma coluna; o efeito visual criado é que o conteúdo está centralizado
+
+# Título do frame
+
+label_titulo = ctk.CTkLabel(
+    form, 
+    text="Adicionar / Editar Cliente", 
+    corner_radius=10,
+    font=ctk.CTkFont(size=20, weight="bold"),
+    text_color="#61223D",
+    fg_color="#F385AA",
+    anchor="w",
+    padx=10, pady=6
+).grid(row=0, column=0, pady=(0, 4), sticky="ew")
+
+# Criando um array de tuplas, cada uma com o texto de cada label e sua respectiva sugestão (placeholder)
 
 labels_entry = [
     ("Nome:", "Ex: Pantera"),
@@ -164,79 +216,160 @@ labels_entry = [
 
 for i, (label, placeholder) in enumerate(labels_entry):
     LabelEntry(form, label, placeholder)\
-        .grid(row=i, column=0, sticky="ew", pady=8)
+        .grid(row=i+1, column=0, sticky="ew", pady=8)
 
-def adicionarNumero():
+def adicionarTelefone():
     global telefonesButtons
-    newTel = button_addNum.entry.get()
-    if len(newTel) == 10 and newTel not in telefonesStr:
-        telefonesStr.append(newTel)
-        for btn in telefonesButtons:
-            telefonesButtons.remove(btn)
+
+    # Definindo um tamanho mínimo e máximo para o número de telefone
+
+    newTel = button_addNum.entry.get() # Obtém o valor digitado na entrada de telefone
+    novo_telefone = newTel.replace("(", "").replace(")", "").replace(" ", "").replace("-", "").replace("+", "") # Removendo todos os caracteres especiais do número de telefone para que seja possível contar apenas os dígitos numéovo_telefone]
+
+    if len(novo_telefone) >= 10 and len(novo_telefone) <= 13:
+        # telefonesStr.append(newTel)
+        # for btn in telefonesButtons:
+        #     telefonesButtons.remove(btn)
+        
+        formatar_telefone(novo_telefone) # Após conferir o número, retorna o valor já editado
+        telefonesStr.append(f"{novo_telefone} - Telefone {tipo_telefone.get()}") 
         criarListaTelefones()
+        button_addNum.entry.delete(0, tk.END) # Limpando a entrada após adicionar o número
+
+
+ # Adicionando um frame para que o campo de entrada de Telefone fique na mesma linha do Combox
+
+# frame_entrada_telefones = ctk.CTkFrame(
+#     form,
+#     fg_color="transparent",
+# )
+# frame_entrada_telefones.grid(row=8, column=0, pady=8, sticky="ew")
+# frame_entrada_telefones.grid_columnconfigure(0, weight=1)
+# frame_entrada_telefones.grid_columnconfigure(1, weight=1)
+
+tipo_telefone = ctk.CTkComboBox(
+    form,
+    values=["Celular","Fixo","WhatsApp"],
+    fg_color="#FDE6F0", 
+    border_color="#CFA4B5", 
+    button_color="#CFA4B5", 
+    dropdown_fg_color="#CFA4B5",
+    font=ctk.CTkFont(size=16),
+    state="readonly"
+)
+tipo_telefone.grid(row=8, column=0, sticky="ew")
+tipo_telefone.configure(0, width=1)
+tipo_telefone.set("Selecione o tipo de telefone")
+
+# Criando uma função que verifca em tempo real o tamanho da entrada do usuãrio e adiciona um tipo de "formatação" para que o número seja enviado para a tabela 
+
+def formatar_telefone(numero): # Definindo que a função tem um parâmetro event, que serve para identificar os eventos de tecla no teclado quando apertadas
+    global tipo_telefone
+
+    
+
+    if len(numero) == 12: # Verificando se o número digitado possui 
+        tipo_telefone.configure(values=["Fixo"]) # Definindo que o único tipo de telefone disponível para esse tamanho (12) é o 'Fixo', evitando que o número seja registrado como 'Celular' ou 'WhatsApp'
+        tipo_telefone.set("Fixo")
+        numero_local = numero[4:12] # Cortando os oito primeiros dígitos do número local (padrão), ignorando o valor de DDD e DDI
+        ddi = numero[0:2] # Cortando os dois primeiros dígitos do número registrado para que sirva como o DDD]
+        ddd = numero[2:4] # Cortando os dois próximos dígitos do número para que seja registrado como DDD do número
+        telefone_formatado = f"+{ddi} ({ddd}) {numero_local[0:4]}-{numero_local[4:8]}"
+        return telefone_formatado
+       
+
+
+    
 
 button_addNum = LabelEntryButton(
     form,
-    "Telefones:",
+    "Número de telefone",
     "Ex: (85) 9 0000-0000",
     "Adicionar telefone",
     entries,
-    command=lambda:adicionarNumero()
+    command=lambda: adicionarTelefone())
+button_addNum.grid(row=9, column=0, sticky="ew", padx=(0,4), pady=8)
+# button_addNum.entry.insert(0, "+55 (85) 9 ") # Inserindo um início de telefone padrão para a entrada de telefone do usuário
+
+# Criando um novo botão para adicionar telefones
+
+# frame_addNum = ctk.CTkFrame(form, fg_color="transparent")
+# frame_addNum.grid(row=9, column=0, sticky="ew")
+# frame_addNum.grid_columnconfigure(1, weight=1)
+
+# button_addNum_label = ctk.CTkLabel(
+#     frame_addNum, 
+#     text="",
+#     width=155
+# )
+# button_addNum_label.grid(row=0, column=0, sticky="ew")
+
+frame_telefones = ctk.CTkFrame(form, fg_color= "transparent")
+frame_telefones.grid(row=10, column=0, pady=8, padx=8, sticky="ew")
+frame_telefones.grid_columnconfigure(0,weight=1)
+
+frame_listaTelefones = ctk.CTkScrollableFrame(
+    frame_telefones,
+    height=200, 
+    fg_color="#FDDBB9",
+    border_width=2, 
+    border_color="#CFA4B5", 
+    corner_radius=5,
+    scrollbar_button_color="#FDDBE9",
+    scrollbar_button_hover_color="#F385AB"
 )
-button_addNum.grid(row=7, column=0, sticky="ew", pady=8)
-
-tipo_telefone = ctk.CTkComboBox(form,
-                                values=["Celular","Fixo","WhatApp"], 
-                                width= 190, 
-                                state="readonly",
-                                fg_color="#FDE6F0", 
-                                border_color="#CFA4B5", 
-                                button_color="#CFA4B5", 
-                                dropdown_fg_color="#CFA4B5"
-                                )
-
-tipo_telefone.grid(row=8, column=0, sticky="w", padx=(172,0))
-tipo_telefone.set("Selecione o tipo de número")
-
-# frame_telefones = ctk.CTkFrame(form, fg_color= "transparent")
-# frame_telefones.grid(row=9, column=0, pady=8, padx=0, sticky="ew")
-# frame_telefones.grid_columnconfigure(1,weight=1)
-
-frame_listaTelefones = ctk.CTkScrollableFrame(form,height=100, fg_color="transparent",border_width=2, border_color="#CFA4B5", corner_radius=5)
-frame_listaTelefones.grid(row=9, column=0, padx=(172,10), pady=(16,5), sticky="ew")
+frame_listaTelefones.grid(row=0, column=0, padx=(0, 0), sticky="we")
 frame_listaTelefones.grid_columnconfigure(0, weight=1)
 frame_listaTelefones._scrollbar.configure(height=0)
 
-telefonesStr = []
-telefonesButtons = []#lista de botões com os número telefônicos para que possam ser deletados
-numberSlc = []#número da lista de descarte de números telefonicos selecionado num momento
+telefonesStr = ["1254523452345 - Telefone Celular", "9620394869381 - Telefone Fixo", "1243459704739 - Telefone WhatsApp"] # Lista telefônica que será retirada do banco de dados
+telefonesButtons = [] # Lista de botões com os número telefônicos para que possam ser deletados
+numberSlc = None # Número da lista de descarte de números telefonicos selecionado num momento
 
 def removerTelefone():
     global numberSlc
-    telefonesStr.remove(numberSlc)
-    for btn in telefonesButtons:
+    if not numberSlc:
+        return  # Nada selecionado
+
+    telefonesStr[:] = [t for t in telefonesStr if t != numberSlc] # Cria uma cópia da lista telefonesStr, itera com ela e atualiza a lista original com o telefone deletado, a fim de evitar bugs na hora da iteração
+
+    for btn in telefonesButtons[:]:
         if btn.cget("text") == numberSlc:
             btn.destroy()
             telefonesButtons.remove(btn)
-    
+    numberSlc = None
+
+
 def criarListaTelefones():
-    for i,telefone in enumerate(telefonesStr):
+    ctk.CTkLabel(
+        frame_listaTelefones,
+        text="Telefones Registrados",
+        font=ctk.CTkFont("Segoe UI", 20, "bold"),
+        text_color="#61223D",
+        width=20,
+        anchor="w",
+        corner_radius=10,
+        padx=10, pady=6,
+        fg_color="#F5C89A"
+    ).grid(row=0, column=0, sticky="ew", padx=8, pady=(4,8)) # Criando uma label como t'itulo da lista de telefones
+
+    for i, telefone in enumerate(telefonesStr):
         btn = TelefoneButton(
-            frame_listaTelefones,
+            frame_listaTelefones, 
             text=telefonesStr[i]
         )
-        btn.grid(row=i, column=0, sticky="ew")
+        btn.grid(row=i+1, column=0, sticky="ew")
         telefonesButtons.append(btn)
 
 criarListaTelefones()
 
 removeTelBtn = BtnIconText(form, text="Remover telefone", command=lambda: removerTelefone())
-removeTelBtn.grid(row=10, column=0, padx=(190,20), sticky="new")
+removeTelBtn.grid(row=11, column=0, sticky="ew", padx=(4,0), pady=8)
 
-LabelCheckbox(form, "Status:").grid(row=11, column=0, padx=5, pady=(8), sticky="nsew")
+LabelCheckbox(form, "Status:").grid(row=12, column=0, padx=5, pady=(8), sticky="nsew")
 
 buttons_frame = ctk.CTkFrame(form, fg_color="transparent")
-buttons_frame.grid(row=12, column=0, pady=(0, 8))
+buttons_frame.grid(row=13, column=0, pady=(0, 8))
 
 BtnIconText(
     buttons_frame,
