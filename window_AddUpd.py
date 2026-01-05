@@ -42,6 +42,11 @@ class LabelEntry(ctk.CTkFrame):
         self.entry.grid(row=0, column=1, sticky="ew", ipadx=5)
         entries[label_text.replace(":", "").strip()] = self.entry
 
+def apenasNumeros(char):
+    return (char.isdigit() or char == "")
+
+validador = window.register(apenasNumeros)
+
 class LabelEntryButton(ctk.CTkFrame):
     def __init__(self, master, label_text, placeholder, button_text, entries, command):
         super().__init__(master, fg_color="transparent")
@@ -55,9 +60,15 @@ class LabelEntryButton(ctk.CTkFrame):
         )
         self.label.grid(row=0, column=0, padx=(0, 10), sticky="w")
 
+        
+
         self.entry = Entry(
             self,
-            placeholder
+            placeholder=placeholder
+        )
+        self.entry.configure(
+            validate="key",
+            validatecommand=(validador, "%P")
         )
 
         self.entry.grid(row=0, column=1, sticky="ew", padx=(6, 10), ipadx=5)
@@ -211,33 +222,20 @@ def adicionarTelefone():
     global telefonesButtons
 
     # Definindo um tamanho mínimo e máximo para o número de telefone
-    tamanho_min = 10
-    tamanho_max = 13
 
     newTel = button_addNum.entry.get() # Obtém o valor digitado na entrada de telefone
-    numero_ = newTel.replace("(", "").replace(")", "").replace(" ", "").replace("-", "").replace("+", "") # Removendo todos os caracteres especiais do número de telefone para que seja possível contar apenas os dígitos numéricos
+    novo_telefone = newTel.replace("(", "").replace(")", "").replace(" ", "").replace("-", "").replace("+", "") # Removendo todos os caracteres especiais do número de telefone para que seja possível contar apenas os dígitos numéovo_telefone]
 
-    while True:
-        try:
-            for digito in numero_:
-                if not digito.isdigit():
-                    messagebox.showerror("Erro de digitação", "A entrada enviada é inválida. Por favor, insira um valor de telefone válido, evitando símbolos, letras e espaços.")
-                    button_addNum.entry.delete(0, tk.END)
-                    continue
-            else:
-                print("Tudo okay")
+    if len(novo_telefone) >= 10 and len(novo_telefone) <= 13:
+        # telefonesStr.append(newTel)
+        # for btn in telefonesButtons:
+        #     telefonesButtons.remove(btn)
+        
+        formatar_telefone(novo_telefone) # Após conferir o número, retorna o valor já editado
+        telefonesStr.append(f"{novo_telefone} - Telefone {tipo_telefone.get()}") 
+        criarListaTelefones()
+        button_addNum.entry.delete(0, tk.END) # Limpando a entrada após adicionar o número
 
-            elif len(numero_) >= tamanho_min and len(numero_) <= tamanho_max
-                # telefonesStr.append(newTel)
-                # for btn in telefonesButtons:
-                #     telefonesButtons.remove(btn)
-                
-                formatar_telefone(numero) # Após conferir o número, retorna o valor já editado 
-                criarListaTelefones()
-                break
-        except:
-            messagebox.showerror("Erro", "Um erro foi encontrado ao tentar adicionar o número de telefone. Por favor, tente novamente.")
-            break
 
  # Adicionando um frame para que o campo de entrada de Telefone fique na mesma linha do Combox
 
