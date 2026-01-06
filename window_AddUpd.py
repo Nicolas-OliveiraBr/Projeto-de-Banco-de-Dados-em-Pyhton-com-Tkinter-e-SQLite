@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
-from tkinter import ttk
 from PIL import Image, ImageTk
 from dataBaseConn import salvar_dados_clientes
 from dataBaseConn import atualizar_dados_clientes
@@ -9,7 +8,7 @@ from components.entry import Entry
 from components.label import Label
 from components.btn_IconText import BtnIconText
 import re
-def abrir_tela_AddUpd_Cliente(titulo):
+def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
     window = ctk.CTk()
     window.state('zoomed')
     window.title(titulo)
@@ -390,5 +389,4 @@ def abrir_tela_AddUpd_Cliente(titulo):
     ).grid(row=0, column=1, padx=8)
 
     window.mainloop()
-abrir_tela_AddUpd_Cliente("teste")
 # abrir_tela_AddUpd_Cliente("teste")
