@@ -4,6 +4,7 @@ import os
 from components.btn_IconText import BtnIconText
 from dataBaseConn import getTuples
 from tkinter import ttk
+from window_AddUpd import abrir_tela_AddUpd_Cliente
 
 root = ctk.CTk() # Criação de uma janela raíz, a principal do programa
 root.title("Banco de Dados - Clientes") # Definindo um nome para a janela
@@ -178,7 +179,7 @@ tabela_clientes = criar_tabela_clientes(frame_meio)
 BtnIconText(
     buttons_frame,
     text="Adicionar cliente",
-    command=lambda: print("adicionar cliente")
+    command=lambda: abrir_tela_AddUpd_Cliente("Adicionar Cliente")
 ).grid(row=0, column=0, padx=4)
 
 BtnIconText(
@@ -190,7 +191,7 @@ BtnIconText(
 BtnIconText(
     buttons_frame,
     text="Editar",
-    command=lambda: print("editar")
+    command=lambda: abrir_tela_AddUpd_Cliente("Editar cliente")
 ).grid(row=0, column=2, padx=4)
 
 BtnIconText(

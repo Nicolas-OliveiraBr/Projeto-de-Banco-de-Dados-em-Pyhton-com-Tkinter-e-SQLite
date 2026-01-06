@@ -24,14 +24,13 @@ with sqlite3.connect("banco_de_dados_MFDS.db") as conn: # Criando uma pasta e um
     cursor.execute("""
             CREATE TABLE IF NOT EXISTS cliente_telefones (
                     id INTEGER PRIMARY KEY,
-                    numero VARCHAR(100),
+                    numero VARCHAR(20),
                     tipo VARCHAR(100),
                     clientes_id INTEGER,
                    
                     FOREIGN KEY (clientes_id)
                         REFERENCES clientes(id)
-            )"""
-    )
+            )""")
     conn.commit() # Comitando as alterações (necessário e obrigatório para o registro de novos valores)
 
 def getTuples(tabela, atributos):
@@ -45,7 +44,7 @@ def getTuples(tabela, atributos):
 
 # Atribuindo/mapeando nomes amigáveis às chaves do array tabela_clientes_atr para que a função 'salvar_dados_clientes' não rejeite palavras com espaços
 
-mapa = {
+mapaClientes = {
     "Nome": "nome", 
     "Idade": "idade", 
     "CPF": "cpf", 
@@ -56,26 +55,34 @@ mapa = {
     "Status": "status"
 }
 
-def salvar_dados_clientes(entries):
+def salvar_dados_clientes(entries, entriesTel):
     atributos_lista = []
     valores = []
 
-    # Percorre o dicionário 'mapa', que relaciona o rótulo da interface com a coluna do banco
-    for rotulo, coluna in mapa.items():
+    # Percorre o dicionário 'mapaClientes', que relaciona o rótulo da interface com a coluna do banco
+    for rotulo, coluna in mapaClientes.items():
         atributos_lista.append(coluna) # Adiciona o nome da coluna na lista
         valores.append(entries[rotulo].get()) # Obtém o valor digitado pelo usuário no campo da interface
 
     atributos = ", ".join(atributos_lista)
     subst = ", ".join("?" for _ in atributos_lista)
 
-    sql = f"""
+    sqlClientes = f"""
         INSERT INTO clientes ({atributos})
         VALUES ({subst})
     """
+    # tuples_CliTel = getTuples("cliente_telefones", "numero, tipo, clientes_id")
 
     try:
-        cursor.execute(sql, tuple(valores)) # Executa a query SQL passando os valores como tupla
-        
+        cursor.execute(sqlClientes, tuple(valores)) # Executa a query SQL passando os valores como tupla
+        cliente_id = cursor.lastrowid
+
+        for tupleTel in entriesTel:
+            # tpCompleta = tupleTel + (cliente_id)
+            cursor.execute(f"""
+                INSERT INTO cliente_telefones (numero, tipo, clientes_id)
+                VALUES (?, ?, ?)
+            """, (tupleTel[0],tupleTel[1],cliente_id))
         conn.commit() # Comitando as alterações
         print("Dados salvos! :D")
     except sqlite3.IntegrityError as e: 
@@ -91,12 +98,14 @@ def salvar_dados_clientes(entries):
                 return False
         raise  # Repete o erro novamente caso seja um problema não tratado acima
 
+
+
 # Criando uma função para atualizar os dados de um cliente específico no banco de dados
 def atualizar_dados_clientes(cliente_id, entries): 
     atributos_lista = []
     valores = []
 
-    for rotulo, coluna in mapa.items(): # Percorrendo o dicionário 'mapa' para obter os nomes das colunas e os valores correspondentes
+    for rotulo, coluna in mapaClientes.items(): # Percorrendo o dicionário 'mapaClientes' para obter os nomes das colunas e os valores correspondentes
         atributos_lista.append(f"{coluna} = ?")
         valores.append(entries[rotulo].get()) # Obtendo o valor digitado pelo usuário no campo da interface
 
