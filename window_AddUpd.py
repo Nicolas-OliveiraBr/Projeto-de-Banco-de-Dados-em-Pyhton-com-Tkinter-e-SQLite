@@ -390,5 +390,3 @@ def abrir_tela_AddUpd_Cliente(titulo):
     ).grid(row=0, column=1, padx=8)
 
     window.mainloop()
-abrir_tela_AddUpd_Cliente("teste")
-# abrir_tela_AddUpd_Cliente("teste")
