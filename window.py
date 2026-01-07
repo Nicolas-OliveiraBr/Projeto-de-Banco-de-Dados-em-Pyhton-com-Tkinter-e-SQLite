@@ -1,8 +1,7 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import sqlite3
 import customtkinter as ctk
-from tkinter import messagebox
 from dataBaseConn import getTuples, salvar_dados_clientes
 
 # Criando uma array para o nome dos rótulos de cada uma das entries
