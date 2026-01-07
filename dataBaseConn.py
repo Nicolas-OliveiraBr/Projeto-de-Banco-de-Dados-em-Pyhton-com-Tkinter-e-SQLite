@@ -12,11 +12,11 @@ with sqlite3.connect("banco_de_dados_MFDS.db") as conn: # Criando uma pasta e um
                 id INTEGER PRIMARY KEY,
                 nome VARCHAR(150) NOT NULL,
                 idade INTEGER,
+                data_nascimento DATE,
                 cpf VARCHAR(11) UNIQUE NOT NULL,
-                email VARCHAR(100) UNIQUE,
                 endereco TEXT,
                 localidade VARCHAR(100),
-                data_nascimento DATE,
+                email VARCHAR(100) UNIQUE,
                 status BOOLEAN
             )"""
     )
@@ -33,10 +33,12 @@ with sqlite3.connect("banco_de_dados_MFDS.db") as conn: # Criando uma pasta e um
             )""")
     conn.commit() # Comitando as alterações (necessário e obrigatório para o registro de novos valores)
 
-def getTuples(tabela, atributos):
+def getTuples(tabela, atributos, onde = None):
     tuples = []
-
-    cursor.execute(f"SELECT {atributos} FROM {tabela}") # Pegando as informações diretamente da tabela 'clientes' do banco de dados
+    if onde == None:
+        cursor.execute(f"SELECT {atributos} FROM {tabela}") # Pegando as informações diretamente da tabela 'clientes' do banco de dados
+    else:
+        cursor.execute(f"SELECT {atributos} FROM {tabela} WHERE {onde}")
 
     for tuple in cursor.fetchall():
         tuples.append(tuple)
@@ -47,11 +49,11 @@ def getTuples(tabela, atributos):
 mapaClientes = {
     "Nome": "nome", 
     "Idade": "idade", 
-    "CPF": "cpf", 
-    "E-mail": "email", 
-    "Endereço": "endereco", 
-    "Cidade": "localidade", 
     "Data de Nascimento": "data_nascimento", 
+    "CPF": "cpf",
+    "Endereço": "endereco", 
+    "Cidade": "localidade",  
+    "E-mail": "email", 
     "Status": "status"
 }
 

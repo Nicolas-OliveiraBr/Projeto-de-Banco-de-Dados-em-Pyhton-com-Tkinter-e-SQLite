@@ -2,8 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
 from PIL import Image, ImageTk
-from dataBaseConn import salvar_dados_clientes
-from dataBaseConn import atualizar_dados_clientes
+from dataBaseConn import salvar_dados_clientes, atualizar_dados_clientes, getTuples
 from components.entry import Entry
 from components.label import Label
 from components.btn_IconText import BtnIconText
@@ -22,6 +21,12 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
 
     entries = {}
     entriesTelefones = []
+
+    if id_cliente != None:
+        tupla_cliente = getTuples("CLIENTES", "nome, idade, data_nascimento, cpf, endereco, localidade, email, status", f"id = {id_cliente}")[0]
+        print(tupla_cliente)
+        lista_telefones = getTuples("CLIENTE_TELEFONES", "numero, tipo", f"clientes_id = {id_cliente}")
+        print(lista_telefones)
 
     class LabelEntry(ctk.CTkFrame):
         def __init__(self, master, label_text, placeholder):
@@ -84,6 +89,12 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
             entries[label_text.replace(":", "").strip()] = self.entry
 
     class LabelCheckbox(ctk.CTkFrame):
+        def atualiza_label(self):
+                state_label = "Ativo" if self.var.get() else "Inativo"
+                # exibe "Status: Ativo" ou "Status: Inativo"
+                self.state_label.configure(text=state_label) # Altera a exibição da label quando ativo => .configure ajusta alguma propriedade, determinada durante a cosntrução do código
+
+
         def __init__(self, master, label_text, default=False):
             super().__init__(master, fg_color="transparent")
 
@@ -109,11 +120,6 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
 
             self.var = tk.BooleanVar(value=default)
 
-            def atualiza_label():
-                state_label = "Ativo" if self.var.get() else "Inativo"
-                # exibe "Status: Ativo" ou "Status: Inativo"
-                self.state_label.configure(text=state_label) # Altera a exibição da label quando ativo => .configure ajusta alguma propriedade, determinada durante a cosntrução do código
-
             self.checkbox = ctk.CTkCheckBox(
                 self.container,
                 text="",  # remove o texto padrão "CTKcheckbox"
@@ -122,7 +128,7 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
                 border_width=2,
                 corner_radius=15,
                 hover_color="#F385AA",
-                command=atualiza_label
+                command=self.atualiza_label
             )
             self.checkbox.grid(row=0, column=0, padx=(8, 5), pady=4, sticky="w")
 
@@ -131,7 +137,7 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
 
             entries[label_text.replace(":", "").strip()] = self.var
 
-            atualiza_label()
+            self.atualiza_label()
 
     # class TelefoneButton(ctk.CTkButton):
     #     def selecionarBotao(index):
@@ -216,21 +222,26 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
     ]
 
     for i, (label, placeholder) in enumerate(labels_entry):
-        LabelEntry(form, label, placeholder)\
-            .grid(row=i+1, column=0, sticky="ew", pady=8)
+        labelEntry = LabelEntry(form, label, placeholder)
+        labelEntry.grid(row=i+1, column=0, sticky="ew", pady=8)
+        if id_cliente:
+            labelEntry.entry.insert(0, tupla_cliente[i])
+        
 
     def adicionarTelefone():
         # global telefonesButtons
-        newTel = button_addNum.entry.get() # Obtém o valor digitado na entrada de telefone
+        newTel = area_addNum.entry.get() # Obtém o valor digitado na entrada de telefone
         tipoTel = tipo_telefone.get()
         if 10 <= len(newTel) <= 13:# Definindo um tamanho mínimo e máximo para o número de telefone
             if tipoTel == "Selecione o tipo de telefone":
                 messagebox.showerror("Erro: tipo telefônico não selecionado", "Selecione o tipo de telefone inserido")
+            elif (newTel, tipoTel) in entriesTelefones:
+                messagebox.showerror("Já existe", "Telefone ja existente selecione outro")
             else:
                 formatar_telefone(newTel) # Após conferir o número, retorna o valor já editado
                 telefonesStr.append(f"{newTel} - Telefone {tipoTel}") 
                 criarListaTelefones()
-                button_addNum.entry.delete(0, tk.END) # Limpando a entrada após adicionar o número
+                area_addNum.entry.delete(0, tk.END) # Limpando a entrada após adicionar o número
         
 
 
@@ -273,18 +284,15 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
             return telefone_formatado
         
 
-
-        
-
-    button_addNum = LabelEntryButton(
+    area_addNum = LabelEntryButton(
         form,
         "Número de telefone",
         "Ex: (85) 9 0000-0000",
         "Adicionar telefone",
         entries,
         command=lambda: adicionarTelefone())
-    button_addNum.grid(row=9, column=0, sticky="ew", padx=(0,4), pady=8)
-    # button_addNum.entry.insert(0, "+55 (85) 9 ") # Inserindo um início de telefone padrão para a entrada de telefone do usuário
+    area_addNum.grid(row=9, column=0, sticky="ew", padx=(0,4), pady=8)
+    # area_addNum.entry.insert(0, "+55 (85) 9 ") # Inserindo um início de telefone padrão para a entrada de telefone do usuário
 
     # Criando um novo botão para adicionar telefones
 
@@ -317,7 +325,10 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
     frame_listaTelefones.grid_columnconfigure(0, weight=1)
     frame_listaTelefones._scrollbar.configure(height=0)
 
-    telefonesStr = ["1254523452345 - Telefone Celular", "9620394869381 - Telefone Fixo", "1243459704739 - Telefone WhatsApp"] # Lista telefônica que será retirada do banco de dados
+    telefonesStr = [] # Lista telefônica que será retirada do banco de dados
+    if id_cliente:
+        for tuple in lista_telefones:
+            telefonesStr.append(f"{tuple[0]} - {tuple[1]}")
     telefonesButtons = [] # Lista de botões com os número telefônicos para que possam ser deletados
     numberSlc = None # Número da lista de descarte de números telefonicos selecionado num momento
 
@@ -371,7 +382,12 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
     removeTelBtn = BtnIconText(form, text="Remover telefone", command=lambda: removerTelefone())
     removeTelBtn.grid(row=11, column=0, sticky="ew", padx=(4,0), pady=8)
 
-    LabelCheckbox(form, "Status:").grid(row=12, column=0, padx=5, pady=(8), sticky="nsew")
+    checkBox = LabelCheckbox(form, "Status:")
+    checkBox.grid(row=12, column=0, padx=5, pady=(8), sticky="nsew")
+    if id_cliente:
+        if tupla_cliente[7] == 1:
+            checkBox.checkbox.select()
+            checkBox.atualiza_label()
 
     buttons_frame = ctk.CTkFrame(form, fg_color="transparent")
     buttons_frame.grid(row=13, column=0, pady=(0, 8))
@@ -389,4 +405,4 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
     ).grid(row=0, column=1, padx=8)
 
     window.mainloop()
-# abrir_tela_AddUpd_Cliente("teste")
+# abrir_tela_AddUpd_Cliente("teste", "1")
