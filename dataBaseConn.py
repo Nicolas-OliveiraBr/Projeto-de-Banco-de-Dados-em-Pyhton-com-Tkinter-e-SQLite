@@ -121,3 +121,21 @@ def atualizar_dados_clientes(cliente_id, entries):
     cursor.execute(sql, tuple(valores)) 
     conn.commit()
 # print(getTuples("clientes", "*"))
+
+def deletar_cliente_db(cliente_id):
+    try:
+        cursor.execute(
+            "DELETE FROM cliente_telefones WHERE clientes_id = ?",
+            (cliente_id,)
+        )
+
+        cursor.execute(
+            "DELETE FROM clientes WHERE id = ?",
+            (cliente_id,)
+        )
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise e

@@ -3,7 +3,7 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 import os
 from components.btn_IconText import BtnIconText
-from dataBaseConn import getTuples
+from dataBaseConn import getTuples, deletar_cliente_db
 from tkinter import ttk
 from window_AddUpd import abrir_tela_AddUpd_Cliente
 
@@ -177,9 +177,102 @@ style.map(
 
 #Função que retorna que o id do cliente na linha selecionada
 def getLineSelection():
-    select = tabela_clientes.selection()
-    id = tabela_clientes.item(select)['values'][0]
-    return id
+    selecionado = tabela_clientes.selection()
+
+    if not selecionado:
+        return None
+
+    valores = tabela_clientes.item(selecionado[0], "values")
+    return valores[0]
+
+#Função da janela modal de confirmação
+def modal_confirmacao(master):
+    resposta = {"valor": False}
+
+    modal = ctk.CTkToplevel(master)
+
+    largura = 420
+    altura = 280
+
+    #Centralizando a janela modal
+    x = (modal.winfo_screenwidth() // 2) - (largura // 2)
+    y = (modal.winfo_screenheight() // 2) - (altura // 2)
+    modal.geometry(f"{largura}x{altura}+{x}+{y}")
+
+    modal.configure(fg_color="#FFC0D9")
+    modal.resizable(False, False)
+
+    modal.transient(master)
+    modal.grab_set()
+
+
+    ctk.CTkLabel(
+        modal,
+        text=""
+    ).pack(pady=(20, 10))
+
+    #texto de confirmação
+    ctk.CTkLabel(
+        modal,
+        text="Você tem certeza?",
+        font=("Segoe UI", 20, "bold"),
+        text_color="#61223D"
+    ).pack(pady=(0, 20))
+
+    #botões de confirmação
+    frame_btn = ctk.CTkFrame(modal, fg_color="transparent")
+    frame_btn.pack()
+
+    def sim():
+        resposta["valor"] = True
+        modal.destroy()
+
+    def nao():
+        modal.destroy()
+
+    ctk.CTkButton(
+        frame_btn,
+        text="Sim",
+        width=120,
+        fg_color="#FEE9F0",
+        text_color="#61223D"
+    , command=sim).grid(row=0, column=0, padx=10)
+
+    ctk.CTkButton(
+        frame_btn,
+        text="Não",
+        width=120,
+        fg_color="#FEE9F0",
+        text_color="#61223D"
+    , command=nao).grid(row=0, column=1, padx=10)
+
+    modal.wait_window()
+    return resposta["valor"]
+
+
+#Função para deletar cliente
+def deletar_cliente():
+    id_cliente = getLineSelection()
+
+    if id_cliente is None:
+        messagebox.showwarning("Atenção", "Selecione um cliente para deletar!")
+        return
+
+    confirmar = modal_confirmacao(root)
+
+
+    if not confirmar:
+        return
+
+    try:
+        deletar_cliente_db(id_cliente)
+
+        tabela_clientes.delete(tabela_clientes.selection()[0])
+
+        messagebox.showinfo("Sucesso", "Cliente deletado com sucesso!")
+
+    except Exception as erro:
+        messagebox.showerror("Erro", f"Erro ao deletar cliente:\n{erro}")
 
 #Criando a tabela clientes
 tabela_clientes = criar_tabela_clientes(frame_meio)
@@ -208,7 +301,7 @@ btnUpdCliente.grid(row=0, column=2, padx=4)
 btnDltCliente = BtnIconText(
     buttons_frame,
     text="Deletar",
-    command=lambda: print("deletar")
+    command=deletar_cliente
 )
 btnDltCliente.grid(row=0, column=3, padx=4)
 
