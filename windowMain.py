@@ -190,6 +190,7 @@ def modal_confirmacao(master):
     resposta = {"valor": False}
 
     modal = ctk.CTkToplevel(master)
+    modal.title("Deletar cliente")
 
     largura = 420
     altura = 280
@@ -204,7 +205,6 @@ def modal_confirmacao(master):
 
     modal.transient(master)
     modal.grab_set()
-
 
     ctk.CTkLabel(
         modal,
@@ -255,7 +255,7 @@ def deletar_cliente():
     id_cliente = getLineSelection()
 
     if id_cliente is None:
-        messagebox.showwarning("Atenção", "Selecione um cliente para deletar!")
+        messagebox.showwarning("Atenção", "Selecione um cliente para deletar!", parent=root)
         return
 
     confirmar = modal_confirmacao(root)
@@ -276,6 +276,17 @@ def deletar_cliente():
 
 #Criando a tabela clientes
 tabela_clientes = criar_tabela_clientes(frame_meio)
+
+# Código facilitado pela IA: criação de uma função que deleta e refaz os dados da tabela
+
+def atualizar_dados_tabela():
+    tabela_clientes.delete(*tabela_clientes.get_children())
+    for cliente in getTuples("clientes", "id, nome, cpf, email"):
+        tabela_clientes.insert("", "end", values=cliente)
+
+def atualizar_loop():
+    atualizar_dados_tabela()
+    root.after(1000, atualizar_loop) # Cria um loop que atualiza periodicamente a tabela - não recomendável pela sua rápida atualização, mas funcional
 
 #Frame baixo - botões
 BtnIconText(

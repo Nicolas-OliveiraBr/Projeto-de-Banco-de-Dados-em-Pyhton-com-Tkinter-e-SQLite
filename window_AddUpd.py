@@ -7,12 +7,14 @@ from components.entry import Entry
 from components.label import Label
 from components.btn_IconText import BtnIconText
 import re
+
 def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
     window = ctk.CTk()
     window.state('zoomed')
     window.title(titulo)
     ctk.set_appearance_mode("light")
     window.configure(fg_color="#FDE6F0")
+    window.attributes('-topmost', True) # Define que a tela sobreposta por cima das outras, assim evitando que ela perca foco caso uma resposta do código a tire de foco
 
     window.geometry("800x500")
     window.grid_rowconfigure(0, weight=1)
@@ -234,11 +236,11 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
         tipoTel = tipo_telefone.get()
         if 10 <= len(newTel) <= 13:# Definindo um tamanho mínimo e máximo para o número de telefone
             if tipoTel == "Selecione o tipo de telefone":
-                messagebox.showerror("Erro: tipo telefônico não selecionado", "Selecione o tipo de telefone inserido")
+                messagebox.showerror("Erro: tipo telefônico não selecionado", "Selecione o tipo de telefone inserido como 'Fixo', 'Celular' ou 'WhatsApp'.", parent=window) # Modificando o texto da mensagem de erro e tornando-a filha da janela de Atualizar, Editar
             elif (newTel, tipoTel) in entriesTelefones:
-                messagebox.showerror("Já existe", "Telefone ja existente selecione outro")
+                messagebox.showerror("Já existe", "Telefone já existente. Selecione outro", parent=window) # Modificando o texto da mensagem de erro e tornando-a filha da janela de Atualizar, Editar
             else:
-                formatar_telefone(newTel) # Após conferir o número, retorna o valor já editado
+                # formatar_telefone(newTel) # Após conferir o número, retorna o valor já editado
                 telefonesStr.append(f"{newTel} - Telefone {tipoTel}") 
                 criarListaTelefones()
                 area_addNum.entry.delete(0, tk.END) # Limpando a entrada após adicionar o número
@@ -271,17 +273,17 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
 
     # Criando uma função que verifca em tempo real o tamanho da entrada do usuãrio e adiciona um tipo de "formatação" para que o número seja enviado para a tabela 
 
-    def formatar_telefone(numero): # Definindo que a função tem um parâmetro event, que serve para identificar os eventos de tecla no teclado quando apertadas
-        global tipo_telefone
+    # def formatar_telefone(numero): # Definindo que a função tem um parâmetro event, que serve para identificar os eventos de tecla no teclado quando apertadas
+    #     global tipo_telefone
 
-        if len(numero) == 12: # Verificando se o número digitado possui 
-            tipo_telefone.configure(values=["Fixo"]) # Definindo que o único tipo de telefone disponível para esse tamanho (12) é o 'Fixo', evitando que o número seja registrado como 'Celular' ou 'WhatsApp'
-            tipo_telefone.set("Fixo")
-            numero_local = numero[4:12] # Cortando os oito primeiros dígitos do número local (padrão), ignorando o valor de DDD e DDI
-            ddi = numero[0:2] # Cortando os dois primeiros dígitos do número registrado para que sirva como o DDD]
-            ddd = numero[2:4] # Cortando os dois próximos dígitos do número para que seja registrado como DDD do número
-            telefone_formatado = f"+{ddi} ({ddd}) {numero_local[0:4]}-{numero_local[4:8]}"
-            return telefone_formatado
+    #     if len(numero) == 12: # Verificando se o número digitado possui 
+    #         tipo_telefone.configure(values=["Fixo"]) # Definindo que o único tipo de telefone disponível para esse tamanho (12) é o 'Fixo', evitando que o número seja registrado como 'Celular' ou 'WhatsApp'
+    #         tipo_telefone.set("Fixo")
+    #         numero_local = numero[4:12] # Cortando os oito primeiros dígitos do número local (padrão), ignorando o valor de DDD e DDI
+    #         ddi = numero[0:2] # Cortando os dois primeiros dígitos do número registrado para que sirva como o DDD]
+    #         ddd = numero[2:4] # Cortando os dois próximos dígitos do número para que seja registrado como DDD do número
+    #         telefone_formatado = f"+{ddi} ({ddd}) {numero_local[0:4]}-{numero_local[4:8]}"
+    #         return telefone_formatado
         
 
     area_addNum = LabelEntryButton(
@@ -331,6 +333,8 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
             telefonesStr.append(f"{tuple[0]} - {tuple[1]}")
     telefonesButtons = [] # Lista de botões com os número telefônicos para que possam ser deletados
     numberSlc = None # Número da lista de descarte de números telefonicos selecionado num momento
+
+# O código abaixo possui algumas implementações de IA (ChatGPT)
 
     def removerTelefone():
         global numberSlc
@@ -392,17 +396,40 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
     buttons_frame = ctk.CTkFrame(form, fg_color="transparent")
     buttons_frame.grid(row=13, column=0, pady=(0, 8))
 
-    BtnIconText(
-        buttons_frame,
-        text="Salvar",
-        command=lambda: salvar_dados_clientes(entries, entriesTelefones)
-    ).grid(row=0, column=0, padx=8)
+    def salvar_clientes(entries, entriesTelefones):
+        salvar_dados_clientes(entries, entriesTelefones)
+        window.destroy()
 
-    BtnIconText(
-        buttons_frame,
-        text="Cancelar",
-        command=lambda: print("clicou cancelar")
-    ).grid(row=0, column=1, padx=8)
+    def atualizar_clientes(id_cliente, entries, entriesTelefones):
+        atualizar_dados_clientes(id_cliente, entries, entriesTelefones)
+        window.destroy()
+
+    if titulo == "Editar cliente":
+
+        BtnIconText(
+            buttons_frame,
+            text="Salvar",
+            command=lambda: atualizar_clientes(id_cliente, entries, entriesTelefones)
+        ).grid(row=0, column=0, padx=8)
+
+        BtnIconText(
+            buttons_frame,
+            text="Cancelar",
+            command=lambda: window.destroy() # Fechando a tela de editar quando o cliente apertar em 'Cancelar'
+        ).grid(row=0, column=1, padx=8)
+
+    else:
+        BtnIconText(
+            buttons_frame,
+            text="Salvar",
+            command=lambda: salvar_clientes(entries, entriesTelefones)
+        ).grid(row=0, column=0, padx=8)
+
+        BtnIconText(
+            buttons_frame,
+            text="Cancelar",
+            command=lambda: window.destroy() # Fechando a tela de adicionar quando o cliente apertar em 'Cancelar'
+        ).grid(row=0, column=1, padx=8)
 
     window.mainloop()
 
