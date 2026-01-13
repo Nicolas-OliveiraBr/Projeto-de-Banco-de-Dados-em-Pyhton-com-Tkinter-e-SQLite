@@ -8,6 +8,7 @@ from components.entry import Entry
 from components.label import Label
 from components.btn_IconText import BtnIconText
 import re
+
 def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
     window = ctk.CTk()
     window.state('zoomed')
@@ -228,24 +229,42 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
         ("E-mail:", "Ex: pantera.rosa@email.com"),
     ]
 
+    # Falta formatar a data de nascimento para o formato dd/mm/aaaa
+    # for i, (label, placeholder) in enumerate(labels_entry):
+    #     labelEntry = LabelEntry(form, label, placeholder)
+    #     labelEntry.grid(row=i+1, column=0, sticky="ew", pady=8)
+    #     if label == "CPF:" or label == "Data de Nascimento:" or label == "Idade:":
+    #         validador = window.register(apenasNumeros)
+    #         if label == "CPF:":
+    #             limite = 11
+    #         elif label == "Data de Nascimento:":
+    #             limite = 6
+    #         elif label == "Idade:":
+    #             limite = 2
+    #         labelEntry.entry.configure(
+    #             validate="key",
+    #             validatecommand=(validador, "%P", limite)
+    #             )
+    #     if id_cliente:
+    #         labelEntry.entry.insert(0, tupla_cliente[i])
+    
     for i, (label, placeholder) in enumerate(labels_entry):
         labelEntry = LabelEntry(form, label, placeholder)
         labelEntry.grid(row=i+1, column=0, sticky="ew", pady=8)
-        if label == "CPF:" or label == "Data de Nascimento:" or label == "Idade:":
+        if label == "CPF:" or label == "Idade:":
             validador = window.register(apenasNumeros)
+
             if label == "CPF:":
                 limite = 11
-            elif label == "Data de Nascimento:":
-                limite = 6
             elif label == "Idade:":
                 limite = 2
+
             labelEntry.entry.configure(
                 validate="key",
                 validatecommand=(validador, "%P", limite)
-                )
+            )
         if id_cliente:
             labelEntry.entry.insert(0, tupla_cliente[i])
-        
 
     def adicionarTelefone():
         # global telefonesButtons
@@ -411,10 +430,19 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
     buttons_frame = ctk.CTkFrame(form, fg_color="transparent")
     buttons_frame.grid(row=13, column=0, pady=(0, 8))
 
+
+    def salvar_e_fechar():
+        if id_cliente:
+            atualizar_dados_clientes(id_cliente, entries, entriesTelefones)
+        else:
+            salvar_dados_clientes(entries, entriesTelefones)
+
+        window.destroy()
+
     BtnIconText(
         buttons_frame,
         text="Salvar",
-        command=lambda: salvar_dados_clientes(entries, entriesTelefones)
+        command=salvar_e_fechar
     ).grid(row=0, column=0, padx=8)
 
     BtnIconText(

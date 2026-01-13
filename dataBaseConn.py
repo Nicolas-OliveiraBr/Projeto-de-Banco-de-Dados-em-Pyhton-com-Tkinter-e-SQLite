@@ -90,35 +90,48 @@ def salvar_dados_clientes(entries, entriesTel):
     except sqlite3.IntegrityError as e: 
         conn.rollback() # Caso ocorra algum erro, desfaz todas as alterações feitas no banco de dados
 
-        msg = str(e).lower()
-        if "unique constraint failed" in msg: # Verifica se o erro foi causado por violar a restrição UNIQUE do atributo
-            if "cpf" in msg:
-                messagebox.showerror("Erro ao salvar", "CPF já cadastrado. Use outro CPF e tente novamente.") # Mensagem de erro
-                return False
-            if "email" in msg:
-                messagebox.showerror("Erro ao salvar", "E-mail já cadastrado. Use outro e‑mail e tente novamente.")
-                return False
-        raise  # Repete o erro novamente caso seja um problema não tratado acima
+        # msg = str(e).lower()
+        # if "unique constraint failed" in msg: # Verifica se o erro foi causado por violar a restrição UNIQUE do atributo
+        #     if "cpf" in msg:
+        #         messagebox.showerror("Erro ao salvar", "CPF já cadastrado. Use outro CPF e tente novamente.") # Mensagem de erro
+        #         return False
+        #     if "email" in msg:
+        #         messagebox.showerror("Erro ao salvar", "E-mail já cadastrado. Use outro e‑mail e tente novamente.")
+        #         return False
+        # raise  # Repete o erro novamente caso seja um problema não tratado acima
 
 
 
 # Criando uma função para atualizar os dados de um cliente específico no banco de dados
-def atualizar_dados_clientes(cliente_id, entries): 
+def atualizar_dados_clientes(cliente_id, entries, entriesTel):
     atributos_lista = []
     valores = []
 
-    for rotulo, coluna in mapaClientes.items(): # Percorrendo o dicionário 'mapaClientes' para obter os nomes das colunas e os valores correspondentes
+    for rotulo, coluna in mapaClientes.items():
         atributos_lista.append(f"{coluna} = ?")
-        valores.append(entries[rotulo].get()) # Obtendo o valor digitado pelo usuário no campo da interface
+        valores.append(entries[rotulo].get())
 
-    valores.append(cliente_id) # Adicionando o ID do cliente ao final da lista de valores para a cláusula WHERE
+    valores.append(cliente_id)
 
-    sql = f"""
+    cursor.execute(f"""
         UPDATE clientes
         SET {', '.join(atributos_lista)}
-        WHERE id = ? 
-    """
-    cursor.execute(sql, tuple(valores)) 
+        WHERE id = ?
+    """, tuple(valores))
+
+    # Remove telefones antigos
+    cursor.execute(
+        "DELETE FROM cliente_telefones WHERE clientes_id = ?",
+        (cliente_id,)
+    )
+
+    # Insere os novos
+    for numero, tipo in entriesTel:
+        cursor.execute("""
+            INSERT INTO cliente_telefones (numero, tipo, clientes_id)
+            VALUES (?, ?, ?)
+        """, (numero, tipo, cliente_id))
+
     conn.commit()
 # print(getTuples("clientes", "*"))
 
