@@ -49,10 +49,16 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
             self.entry.grid(row=0, column=1, sticky="ew", ipadx=5)
             entries[label_text.replace(":", "").strip()] = self.entry
 
-    def apenasNumeros(char):
-        return (char.isdigit() or char == "")
+    def apenasNumeros(char, max):
+        if char == "":
+            return True
+    
+        # Verifica se é número e se respeita o limite passado
+        if char.isdigit() and len(char) <= int(max):
+            return True
+        
+        return False
 
-    validador = window.register(apenasNumeros)
 
     class LabelEntryButton(ctk.CTkFrame):
         def __init__(self, master, label_text, placeholder, button_text, entries, command):
@@ -67,7 +73,7 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
             )
             self.label.grid(row=0, column=0, padx=(0, 10), sticky="w")
 
-            
+            validador = window.register(apenasNumeros)
 
             self.entry = Entry(
                 self,
@@ -225,6 +231,18 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
     for i, (label, placeholder) in enumerate(labels_entry):
         labelEntry = LabelEntry(form, label, placeholder)
         labelEntry.grid(row=i+1, column=0, sticky="ew", pady=8)
+        if label == "CPF:" or label == "Data de Nascimento:" or label == "Idade:":
+            validador = window.register(apenasNumeros)
+            if label == "CPF:":
+                limite = 11
+            elif label == "Data de Nascimento:":
+                limite = 6
+            elif label == "Idade:":
+                limite = 2
+            labelEntry.entry.configure(
+                validate="key",
+                validatecommand=(validador, "%P", limite)
+                )
         if id_cliente:
             labelEntry.entry.insert(0, tupla_cliente[i])
         
