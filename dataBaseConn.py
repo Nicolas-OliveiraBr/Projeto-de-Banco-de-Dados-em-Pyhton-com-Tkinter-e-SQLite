@@ -153,21 +153,16 @@ def get_cliente_selecionado(arvore):
 
 # Função para buscar os dados completos de um cliente pelo ID
 def buscar_dados_cliente(cliente_id):
-    cursor.execute("""
-        SELECT nome, idade, cpf, email, endereco, localidade, data_nascimento, status
-        FROM clientes
-        WHERE id = ?
-    """, (cliente_id,))
+    cliente = getTuples(
+        tabela="clientes",
+        atributos="nome, idade, cpf, email, endereco, localidade, data_nascimento, status",
+        onde=f"id = {cliente_id}"
+    )[0]
 
-    cliente = cursor.fetchone()
-
-    cursor.execute("""
-        SELECT numero, tipo
-        FROM cliente_telefones
-        WHERE clientes_id = ?
-    """, (cliente_id,))
-
-    telefones = cursor.fetchall()
+    telefones = getTuples(
+        tabela="cliente_telefones",
+        atributos="numero, tipo",
+        onde=f"clientes_id = {cliente_id}"
+    )
 
     return cliente, telefones
-

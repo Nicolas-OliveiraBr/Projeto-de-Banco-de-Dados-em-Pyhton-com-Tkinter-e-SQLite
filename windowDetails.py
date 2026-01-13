@@ -164,7 +164,7 @@ def abrir_tela_visualizar(dados, telefones):
     BtnIconText(
         buttons_frame,
         text="Cancelar",
-        command=lambda: print("deletar")
+        command=lambda: window.destroy()
     ).grid(row=0, column=0, padx=8)
 
     window.mainloop()
