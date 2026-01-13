@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
+from tkinter import ttk
 from PIL import Image, ImageTk
 from dataBaseConn import salvar_dados_clientes, atualizar_dados_clientes, getTuples
 from components.entry import Entry

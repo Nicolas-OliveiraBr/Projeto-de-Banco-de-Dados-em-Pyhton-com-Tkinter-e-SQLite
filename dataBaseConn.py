@@ -139,3 +139,35 @@ def deletar_cliente_db(cliente_id):
     except Exception as e:
         conn.rollback()
         raise e
+
+# Função para obter o cliente selecionado na tabela
+def get_cliente_selecionado(arvore):
+    selecionado = arvore.selection()
+
+    if not selecionado:
+        messagebox.showwarning("Aviso", "Selecione um cliente primeiro.")
+        return None
+
+    valores = arvore.item(selecionado[0], "values")
+    return valores 
+
+# Função para buscar os dados completos de um cliente pelo ID
+def buscar_dados_cliente(cliente_id):
+    cursor.execute("""
+        SELECT nome, idade, cpf, email, endereco, localidade, data_nascimento, status
+        FROM clientes
+        WHERE id = ?
+    """, (cliente_id,))
+
+    cliente = cursor.fetchone()
+
+    cursor.execute("""
+        SELECT numero, tipo
+        FROM cliente_telefones
+        WHERE clientes_id = ?
+    """, (cliente_id,))
+
+    telefones = cursor.fetchall()
+
+    return cliente, telefones
+
