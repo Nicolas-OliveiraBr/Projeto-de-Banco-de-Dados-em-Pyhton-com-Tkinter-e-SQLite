@@ -179,3 +179,29 @@ def buscar_dados_cliente(cliente_id):
     )
 
     return cliente, telefones
+
+
+def atualizar_tabela(arvore):
+    for item in arvore.get_children():
+        arvore.delete(item)
+
+    clientes = getTuples(
+        "clientes",
+        "id, nome, cpf, email, status"
+    )
+
+    for cliente in clientes:
+        cliente_id = cliente[0]
+
+        telefones = getTuples(
+            "cliente_telefones",
+            "numero",
+            onde=f"clientes_id = {cliente_id}"
+        )
+
+        lista_telefones = ", ".join([tel[0] for tel in telefones])
+
+        arvore.insert(
+            "", "end",
+            values=(*cliente, lista_telefones)
+        )

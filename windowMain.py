@@ -3,7 +3,7 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 import os
 from components.btn_IconText import BtnIconText
-from dataBaseConn import getTuples, deletar_cliente_db
+from dataBaseConn import atualizar_tabela, getTuples, deletar_cliente_db
 from tkinter import ttk
 from windowDetails import visualizar_cliente
 from window_AddUpd import abrir_tela_AddUpd_Cliente
@@ -267,8 +267,8 @@ def deletar_cliente():
 
     try:
         deletar_cliente_db(id_cliente)
-
-        tabela_clientes.delete(tabela_clientes.selection()[0])
+    
+        atualizar_tabela(tabela_clientes)
 
         messagebox.showinfo("Sucesso", "Cliente deletado com sucesso!")
 
@@ -282,7 +282,7 @@ tabela_clientes = criar_tabela_clientes(frame_meio)
 BtnIconText(
     buttons_frame,
     text="Adicionar cliente",
-    command=lambda: abrir_tela_AddUpd_Cliente("Adicionar Cliente", None)
+    command=lambda: abrir_tela_AddUpd_Cliente("Adicionar Cliente", None, tabela_clientes)
 ).grid(row=0, column=0, padx=4)
 
 btnViewCliente = BtnIconText(
@@ -295,7 +295,7 @@ btnViewCliente.grid(row=0, column=1, padx=4)
 btnUpdCliente = BtnIconText(
     buttons_frame,
     text="Editar",
-    command=lambda: abrir_tela_AddUpd_Cliente("Editar cliente", getLineSelection())
+    command=lambda: abrir_tela_AddUpd_Cliente("Editar cliente", getLineSelection(), tabela_clientes)
 )
 btnUpdCliente.grid(row=0, column=2, padx=4)
 

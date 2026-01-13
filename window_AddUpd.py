@@ -3,13 +3,13 @@ from tkinter import messagebox
 import customtkinter as ctk
 from tkinter import ttk
 from PIL import Image, ImageTk
-from dataBaseConn import salvar_dados_clientes, atualizar_dados_clientes, getTuples
+from dataBaseConn import atualizar_tabela, salvar_dados_clientes, atualizar_dados_clientes, getTuples
 from components.entry import Entry
 from components.label import Label
 from components.btn_IconText import BtnIconText
 import re
 
-def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
+def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None, arvore=None):
     window = ctk.CTk()
     window.state('zoomed')
     window.title(titulo)
@@ -437,6 +437,8 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
         else:
             salvar_dados_clientes(entries, entriesTelefones)
 
+        if arvore:
+            atualizar_tabela(arvore)
         window.destroy()
 
     BtnIconText(
@@ -448,7 +450,7 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None):
     BtnIconText(
         buttons_frame,
         text="Cancelar",
-        command=lambda: print("clicou cancelar")
+        command=lambda: window.destroy()
     ).grid(row=0, column=1, padx=8)
 
     window.mainloop()
