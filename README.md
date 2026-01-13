@@ -43,3 +43,8 @@ para criar uma interface que se relaciona diretamente com o banco de dados.</p>
     </td>
   </tr>
 </table>
+
+<p align="center">
+  OBS: USO DE IA COMO AUXILIAR AO LONGO DO PROJETO PELOS MEMBROS.
+</p>
+
