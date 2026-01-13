@@ -182,11 +182,3 @@ def visualizar_cliente(arvore):
     dados, telefones = buscar_dados_cliente(cliente_id)
 
     abrir_tela_visualizar(dados, telefones)
-
-
-#Na tela principal, o botão visualizar deve chamar a função visualizar_cliente:
-#BtnIconText(
-#    buttons_frame,
-#    text="Visualizar",
-#    command=lambda: visualizar_cliente(tabela_clientes)
-#)

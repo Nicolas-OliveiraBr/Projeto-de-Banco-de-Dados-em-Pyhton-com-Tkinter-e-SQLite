@@ -5,6 +5,7 @@ import os
 from components.btn_IconText import BtnIconText
 from dataBaseConn import getTuples, deletar_cliente_db
 from tkinter import ttk
+from windowDetails import visualizar_cliente
 from window_AddUpd import abrir_tela_AddUpd_Cliente
 
 
@@ -287,7 +288,7 @@ BtnIconText(
 btnViewCliente = BtnIconText(
     buttons_frame,
     text="Visualizar",
-    command=lambda: print("visualizar")
+    command=lambda: visualizar_cliente(tabela_clientes)
 )
 btnViewCliente.grid(row=0, column=1, padx=4)
 
