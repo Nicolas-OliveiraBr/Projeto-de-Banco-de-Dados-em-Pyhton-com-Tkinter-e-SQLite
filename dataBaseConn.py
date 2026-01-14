@@ -114,8 +114,8 @@ def atualizar_dados_clientes(cliente_id, entries, entriesTel):
         UPDATE clientes
         SET {', '.join(atributos_lista)}
         WHERE id = ? 
-    """
-    cursor.execute(sql, tuple(valores)) # Salvando os dados atualizados referentes às informações do cliente, excluindo os dados de telefone
+    """, tuple(valores))
+    # Salvando os dados atualizados referentes às informações do cliente, excluindo os dados de telefone
     
     # Deleta todas as linhas da tabela
     cursor.execute("DELETE FROM cliente_telefones WHERE clientes_id = ?", (int(cliente_id),))    
