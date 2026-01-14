@@ -11,7 +11,7 @@ import re
 
 def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None, arvore=None):
     window = ctk.CTk()
-    window.state('zoomed')
+    # window.state('zoomed')
     window.title(titulo)
     ctk.set_appearance_mode("light")
     window.configure(fg_color="#FDE6F0")
@@ -26,9 +26,8 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None, arvore=None):
 
     if id_cliente != None:
         tupla_cliente = getTuples("CLIENTES", "nome, idade, data_nascimento, cpf, endereco, localidade, email, status", f"id = {id_cliente}")[0]
-        print(tupla_cliente)
+
         lista_telefones = getTuples("CLIENTE_TELEFONES", "numero, tipo", f"clientes_id = {id_cliente}")
-        print(lista_telefones)
 
     class LabelEntry(ctk.CTkFrame):
         def __init__(self, master, label_text, placeholder):
@@ -82,7 +81,7 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None, arvore=None):
             )
             self.entry.configure(
                 validate="key",
-                validatecommand=(validador, "%P")
+                validatecommand=(validador, "%P", 11)
             )
 
             self.entry.grid(row=0, column=1, sticky="ew", padx=(6, 10), ipadx=5)
@@ -251,18 +250,18 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None, arvore=None):
     for i, (label, placeholder) in enumerate(labels_entry):
         labelEntry = LabelEntry(form, label, placeholder)
         labelEntry.grid(row=i+1, column=0, sticky="ew", pady=8)
-        if label == "CPF:" or label == "Idade:":
+        if label == "CPF:" or label == "Data de Nascimento:" or label == "Idade:":
             validador = window.register(apenasNumeros)
-
             if label == "CPF:":
                 limite = 11
+            elif label == "Data de Nascimento:":
+                limite = 8
             elif label == "Idade:":
                 limite = 2
-
             labelEntry.entry.configure(
                 validate="key",
                 validatecommand=(validador, "%P", limite)
-            )
+                )
         if id_cliente:
             labelEntry.entry.insert(0, tupla_cliente[i])
 
@@ -384,7 +383,6 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None, arvore=None):
                 num = re.sub(r"[\D]","",num_tipo)
                 tipo = re.sub(r"[^a-zA-Z]","",(num_tipo.replace("Telefone", "")))
                 entriesTelefones.remove((num, tipo))
-                print(entriesTelefones)
                 btn.destroy()
                 telefonesButtons.remove(btn)
         numberSlc = None
@@ -402,6 +400,8 @@ def abrir_tela_AddUpd_Cliente(titulo, id_cliente = None, arvore=None):
             padx=10, pady=6,
             fg_color="#F5C89A"
         ).grid(row=0, column=0, sticky="ew", padx=8, pady=(4,8)) # Criando uma label como t'itulo da lista de telefones
+
+        entriesTelefones.clear()
 
         for i in range(len(telefonesStr)):
             btn = TelefoneButton(

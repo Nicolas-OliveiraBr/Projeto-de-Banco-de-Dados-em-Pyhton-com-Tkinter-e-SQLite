@@ -1,10 +1,7 @@
-import tkinter as tk
-from tkinter import ttk
 import sqlite3
-import customtkinter as ctk
 from tkinter import messagebox
 
-with sqlite3.connect("banco_de_dados_MFDS.db") as conn: # Criando uma pasta e um arquivo DATABASE onde os dados serão armazenados
+with sqlite3.connect("gestao_clientes.db") as conn: # Criando uma pasta e um arquivo DATABASE onde os dados serão armazenados
     conn.execute("PRAGMA foreign_keys = ON") # Comando para que o SQLite leia chaves estrangeiras
     cursor = conn.cursor() # Criando um cursor para executar os comandos
     cursor.execute("""
@@ -116,24 +113,19 @@ def atualizar_dados_clientes(cliente_id, entries, entriesTel):
     cursor.execute(f"""
         UPDATE clientes
         SET {', '.join(atributos_lista)}
-        WHERE id = ?
-    """, tuple(valores))
-
-    # Remove telefones antigos
-    cursor.execute(
-        "DELETE FROM cliente_telefones WHERE clientes_id = ?",
-        (cliente_id,)
-    )
-
-    # Insere os novos
-    for numero, tipo in entriesTel:
-        cursor.execute("""
-            INSERT INTO cliente_telefones (numero, tipo, clientes_id)
-            VALUES (?, ?, ?)
-        """, (numero, tipo, cliente_id))
-
-    conn.commit()
-# print(getTuples("clientes", "*"))
+        WHERE id = ? 
+    """
+    cursor.execute(sql, tuple(valores)) # Salvando os dados atualizados referentes às informações do cliente, excluindo os dados de telefone
+    
+    # Deleta todas as linhas da tabela
+    cursor.execute("DELETE FROM cliente_telefones WHERE clientes_id = ?", (int(cliente_id),))    
+    for tupleTel in entriesTel:
+            cursor.execute(f"""
+                INSERT INTO cliente_telefones (numero, tipo, clientes_id)
+                VALUES (?, ?, ?)
+            """, (tupleTel[0],tupleTel[1],cliente_id)) # Adiciona novos valores após deletar
+    conn.commit() # Comitando as alterações
+    print("Dados atualizados! :D")
 
 def deletar_cliente_db(cliente_id):
     try:
